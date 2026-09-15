@@ -1,7 +1,7 @@
 ---
 title: "GET /api/invoices/{id}/pdf — Download Invoice as PDF"
 sidebarTitle: "Download PDF"
-description: "GET /api/invoices/{id}/pdf — Download a branded PDF for any invoice. Customize accent color, company name, contact info, and legal text via query parameters."
+description: "GET /api/invoices/{id}/pdf — Download a PDF for any invoice. Optionally customize accent color, company name, phone, email, address, and legal footer text."
 ---
 
 Generate and download a PDF version of any invoice, optionally branded with your company's name, contact details, and accent color. All query parameters are optional — omit them to generate a plain, unbranded PDF using the invoice data alone.
@@ -50,7 +50,7 @@ GET /api/invoices/{id}/pdf
 
 <CodeGroup>
 ```bash cURL
-curl -G "http://localhost:8080/api/invoices/42/pdf" \
+curl -G "https://your-domain.com/api/invoices/42/pdf" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   --data-urlencode "color=#00bcff" \
   --data-urlencode "name=Acme Corp" \

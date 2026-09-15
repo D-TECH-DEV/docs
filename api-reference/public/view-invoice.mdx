@@ -1,5 +1,5 @@
 ---
-title: "GET /api/i/{token} — View a Public Invoice"
+title: "View Shareable Public Invoice — GET /api/i/{token}"
 sidebarTitle: "View Invoice"
 description: "GET /api/i/{token} — Render a public HTML view of an invoice using its unique token. No authentication required — share this link directly with clients."
 ---
@@ -21,7 +21,7 @@ None required. This endpoint is publicly accessible to anyone who has the URL.
 ## Path Parameters
 
 <ParamField path="token" type="string" required>
-  The unique token associated with the invoice. Retrieve this value from the `token` field of any `InvoiceResponse` object.
+  The unique token associated with the invoice. Retrieve this value from the `token` field of any invoice returned by the API.
 </ParamField>
 
 ---

@@ -1,5 +1,5 @@
 ---
-title: "GET /api/invoices/me — List Your Invoices"
+title: "List Your Invoices by Account — GET /api/invoices/me"
 sidebarTitle: "List Invoices"
 description: "GET /api/invoices/me — Retrieve all invoices belonging to your account. Returns an array of invoice objects with client and line item details."
 ---
@@ -22,14 +22,14 @@ This endpoint accepts no query parameters or request body.
 
 <CodeGroup>
 ```bash cURL
-curl "http://localhost:8080/api/invoices/me" \
+curl "https://your-domain.com/api/invoices/me" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 </CodeGroup>
 
 ## Response
 
-Returns a JSON array of invoice objects. Each element follows the full `InvoiceResponse` shape.
+Returns a JSON array of invoice objects. Each element includes the full client profile, payment status, line items, and public token.
 
 ```json
 [
@@ -88,7 +88,7 @@ GET /api/invoices/client/{id}
 
 <CodeGroup>
 ```bash cURL
-curl "http://localhost:8080/api/invoices/client/1" \
+curl "https://your-domain.com/api/invoices/client/1" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 </CodeGroup>

@@ -1,7 +1,7 @@
 ---
-title: "Get started with Invoksa in 5 minutes"
+title: "Quickstart: Build Your First Invoice with Invoksa"
 sidebarTitle: "Quickstart"
-description: "Learn how to register, authenticate, create your first client, and generate your first invoice with Invoksa in five steps."
+description: "Learn how to register your account, verify your email, authenticate, create a client, and generate your first invoice with Invoksa in five steps."
 ---
 
 By the end of this guide you'll have a verified Invoksa account, a JWT token, a client record, and a live invoice — all created through the API. Each step builds on the previous one, so follow them in order. You'll need `curl` or any HTTP client installed on your machine.
@@ -11,7 +11,7 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
     Send a `POST` request to `/api/auth/register` with your username, email, and password to create a new account.
 
     ```bash
-    curl -X POST http://localhost:8080/api/auth/register \
+    curl -X POST https://your-domain.com/api/auth/register \
       -H "Content-Type: application/json" \
       -d '{
         "username": "jane",
@@ -40,7 +40,7 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
     Check your inbox for a verification email from Invoksa. Click the link inside, or call the verification endpoint directly with the token from the email:
 
     ```bash
-    curl "http://localhost:8080/api/auth/verify?token=YOUR_VERIFICATION_TOKEN"
+    curl "https://your-domain.com/api/auth/verify?token=YOUR_VERIFICATION_TOKEN"
     ```
 
     Once verified, your account is active and ready to use.
@@ -54,7 +54,7 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
     Exchange your credentials for a JWT Bearer token by posting to `/api/auth/login`:
 
     ```bash
-    curl -X POST http://localhost:8080/api/auth/login \
+    curl -X POST https://your-domain.com/api/auth/login \
       -H "Content-Type: application/json" \
       -d '{
         "email": "jane@example.com",
@@ -66,16 +66,20 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
 
     ```json
     {
-      "id": 1,
-      "username": "jane",
-      "email": "jane@example.com",
-      "role": "USER",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": 1,
+        "username": "jane",
+        "email": "jane@example.com",
+        "role": "ROLE_USER",
+        "emailVerified": true,
+        "createdAt": "2024-01-15T10:30:00"
+      }
     }
     ```
 
     <Tip>
-      Copy the `token` value and store it in an environment variable so you can reuse it across requests: `export TOKEN="eyJhbGci..."`.
+      The `token` field is returned with a `Bearer ` prefix. Strip that prefix before using it in your `Authorization` header, then store it in an environment variable: `export TOKEN="eyJhbGci..."`. Pass it as `Authorization: Bearer $TOKEN`.
     </Tip>
   </Step>
 
@@ -83,7 +87,7 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
     Add your first client by posting to `/api/clients` with the Bearer token you received in the previous step:
 
     ```bash
-    curl -X POST http://localhost:8080/api/clients \
+    curl -X POST https://your-domain.com/api/clients \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer $TOKEN" \
       -d '{
@@ -110,25 +114,25 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
   </Step>
 
   <Step title="Create an Invoice">
-    Create your first invoice by posting to `/api/invoices`. Use the `clientId` from the previous step and include at least one line item in the `items` array. Set `status` to `400` for unpaid:
+    Create your first invoice by posting to `/api/invoices`. Use the client `id` from the previous step and include at least one line item in the `items` array. Set `status` to `400` for unpaid:
 
     ```bash
-    curl -X POST http://localhost:8080/api/invoices \
+    curl -X POST https://your-domain.com/api/invoices \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer $TOKEN" \
       -d '{
-        "clientId": 1,
+        "client": { "id": 1 },
         "status": 400,
         "items": [
           {
             "description": "Website design",
             "quantity": 1,
-            "unitPrice": 1200.00
+            "price": 1200.00
           },
           {
             "description": "Hosting setup",
             "quantity": 2,
-            "unitPrice": 75.00
+            "price": 75.00
           }
         ]
       }'
@@ -139,22 +143,31 @@ By the end of this guide you'll have a verified Invoksa account, a JWT token, a 
     ```json
     {
       "id": 1,
-      "invoiceNumber": "INV-0001",
+      "number": "INV-0001",
       "token": "a3f8c2e1-9b4d-4f7a-8c3e-1d2f5a6b7c8d",
       "status": "unpaid",
-      "clientId": 1,
+      "client": {
+        "id": 1,
+        "name": "Acme Corp",
+        "email": "billing@acme.com",
+        "phone": "+1 555 000 1234",
+        "address": "123 Main St, Springfield, USA"
+      },
+      "total": 1350.00,
       "items": [
         {
           "id": 1,
           "description": "Website design",
           "quantity": 1,
-          "unitPrice": 1200.00
+          "price": 1200.00,
+          "total": 1200.00
         },
         {
           "id": 2,
           "description": "Hosting setup",
           "quantity": 2,
-          "unitPrice": 75.00
+          "price": 75.00,
+          "total": 150.00
         }
       ],
       "createdAt": "2024-01-15T11:00:00"

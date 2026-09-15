@@ -1,7 +1,7 @@
 ---
 title: "Manage Clients in Invoksa"
 sidebarTitle: "Manage Clients"
-description: "Learn how to create, update, list, and delete clients in Invoksa. Clients are the contacts you create invoices for."
+description: "Learn how to create, update, list, and delete clients in Invoksa. Every invoice links to a client, so you need at least one before issuing invoices."
 ---
 
 In Invoksa, clients are the people or businesses you invoice. Every invoice must be linked to a client, so you need at least one client in your account before you can create your first invoice. This guide walks you through every client operation: creating, listing, updating, and deleting.
@@ -16,7 +16,7 @@ In Invoksa, clients are the people or businesses you invoice. Every invoice must
     Send a `POST` request to `/api/clients` with your client's details in the request body.
 
     ```bash
-    curl -X POST http://localhost:8080/api/clients \
+    curl -X POST https://your-domain.com/api/clients \
       -H "Authorization: Bearer YOUR_TOKEN" \
       -H "Content-Type: application/json" \
       -d '{
@@ -28,7 +28,7 @@ In Invoksa, clients are the people or businesses you invoice. Every invoice must
     ```
   </Step>
   <Step title="Review the response">
-    A successful request returns `201 Created` with the new client object.
+    A successful request returns `200 OK` with the new client object.
 
     ```json
     {
@@ -51,7 +51,7 @@ In Invoksa, clients are the people or businesses you invoice. Every invoice must
 Retrieve all clients associated with your account by calling `GET /api/clients/me`.
 
 ```bash
-curl -X GET http://localhost:8080/api/clients/me \
+curl -X GET https://your-domain.com/api/clients/me \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -83,7 +83,7 @@ curl -X GET http://localhost:8080/api/clients/me \
 Send a `PUT` request to `/api/clients/{id}` to update any fields on an existing client. Include all fields in the body — any field you omit will be cleared.
 
 ```bash
-curl -X PUT http://localhost:8080/api/clients/7 \
+curl -X PUT https://your-domain.com/api/clients/7 \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -113,7 +113,7 @@ curl -X PUT http://localhost:8080/api/clients/7 \
 Send a `DELETE` request to `/api/clients/{id}` to permanently remove a client.
 
 ```bash
-curl -X DELETE http://localhost:8080/api/clients/7 \
+curl -X DELETE https://your-domain.com/api/clients/7 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

@@ -1,10 +1,10 @@
 ---
-title: "GET /api/auth/verify — Verify Your Email Address"
+title: "Verify Your Invoksa Email Address After Registration"
 sidebarTitle: "Verify Email"
-description: "GET /api/auth/verify?token={token} — Confirm your email address after registration using the token sent to your inbox."
+description: "GET /api/auth/verify?token={token} — Confirm your email address after registration using the token sent to your inbox. Required before first login."
 ---
 
-After registering, Invoksa automatically sends a verification email to the address you provided. Use this endpoint to confirm your email address by supplying the token included in that email. Until verification is complete, login attempts will be rejected.
+After registering, Invoksa automatically sends a verification email to the address you provided. Use this endpoint to confirm your email address by supplying the token included in that email. Until verification is complete, login attempts will be rejected. The verification token is valid for **15 minutes** from the time of registration.
 
 ## Endpoint
 
@@ -19,7 +19,7 @@ GET /api/auth/verify?token={token}
 ## Query Parameters
 
 <ParamField query="token" type="string" required>
-  The verification token delivered in the confirmation email. Copy it directly from the link in the email or paste the full URL into your browser.
+  The verification token delivered in the confirmation email. Copy it directly from the link in the email, or paste the full URL into your browser to complete verification automatically.
 </ParamField>
 
 ---
@@ -27,7 +27,7 @@ GET /api/auth/verify?token={token}
 ## Request Example
 
 ```bash
-curl "https://your-domain.com/api/auth/verify?token=eyJhbGciOiJIUzI1NiJ9..."
+curl "https://your-domain.com/api/auth/verify?token=550e8400-e29b-41d4-a716-446655440000"
 ```
 
 ---
@@ -42,7 +42,7 @@ A successful request returns **HTTP 200** with a plain-text confirmation message
 
 | Status | Meaning |
 |--------|---------|
-| `400 Bad Request` | The token is expired or invalid. Request a new verification email by re-registering or contacting support. |
+| `400 Bad Request` | The token is invalid or has expired (tokens are valid for 15 minutes). Register again or contact support to receive a new verification email. |
 
 ---
 

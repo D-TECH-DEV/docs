@@ -1,27 +1,27 @@
 ---
-title: "AI Invoice Generation from Natural Language"
+title: "AI Invoice Generation from a Plain-Text Description"
 sidebarTitle: "AI Generation"
-description: "Invoksa can generate invoice line items from a plain-text description using Google Gemini AI. Learn how AI generation works and how to use it effectively."
+description: "Generate structured invoice line items from a plain-text description using Invoksa's AI endpoint. Review and save the result with a follow-up request."
 ---
 
-Invoksa integrates Google Gemini AI to turn plain-language descriptions into fully structured invoice data — complete with line items, quantities, unit prices, and a calculated total. Instead of manually building each line item, you describe the work you did and let the AI draft the invoice structure for you to review and save.
+Invoksa can turn a plain-language description of work into a fully structured invoice — complete with line items, quantities, unit prices, and a calculated total. Instead of manually building each line item, you describe what was done and let the AI draft the invoice structure for you to review and save.
 
 ---
 
 ## How It Works
 
-When you call the AI generation endpoint, Invoksa sends your description to Google Gemini along with your preferred language and currency. Gemini interprets the description and returns a structured invoice object containing:
+When you call an AI generation endpoint, Invoksa interprets your description and returns a structured invoice or invoice data containing:
 
 - One or more line items, each with a `description`, `quantity`, and `price`
 - A computed `total` per line item and an overall invoice `total`
 
-The result is a **transient invoice** — it exists only in the API response and is not saved to the database. You must explicitly call `POST /api/invoices` with the returned data to persist it.
+Invoksa offers two AI endpoints with different return shapes — choose the one that fits your workflow.
 
 ---
 
-## AI Generation Endpoint
+## Endpoint 1: Structured Invoice Response
 
-Send a `GET` request to `/api/invoices/ai` with three required query parameters:
+`GET /api/invoices/ai` returns a full transient `InvoiceResponse` object. The result is **not saved** — fields like `id`, `number`, `client`, and `token` are `null` until you persist the invoice with `POST /api/invoices`.
 
 <ParamField query="description" type="string" required>
   A plain-text description of the services or products to invoice. Be as specific as possible for the best results.
@@ -38,7 +38,7 @@ Send a `GET` request to `/api/invoices/ai` with three required query parameters:
 **Example request**
 
 ```bash
-curl -X GET "http://localhost:8080/api/invoices/ai?\
+curl -X GET "https://your-domain.com/api/invoices/ai?\
 description=Logo%20design%20and%20brand%20identity%20package&\
 lang=en&\
 devise=USD" \
@@ -89,16 +89,41 @@ devise=USD" \
 
 ---
 
+## Endpoint 2: Raw Text Response
+
+`GET /api/ia/invoice` is a simpler endpoint that returns the AI-generated invoice data as a **raw string** rather than a structured JSON object. This can be useful when you want to display or process the text output directly without mapping it to the full invoice shape.
+
+<ParamField query="description" type="string" required>
+  A plain-text description of the services or products to invoice.
+</ParamField>
+
+<ParamField query="lang" type="string" required>
+  The language for the generated output (for example, `en`, `fr`, `es`).
+</ParamField>
+
+**Example request**
+
+```bash
+curl -X GET "https://your-domain.com/api/ia/invoice?\
+description=5%20hours%20of%20backend%20consulting&\
+lang=en" \
+  -H "Authorization: Bearer <token>"
+```
+
+The response is a plain string — not a JSON object.
+
+---
+
 ## Writing Good Descriptions
 
 The quality of the generated invoice depends heavily on how clearly you describe the work. Follow these tips to get accurate, usable results:
 
 <Accordion title="Be specific about services rendered">
-  Instead of `"design work"`, write `"UI/UX design for a three-screen mobile onboarding flow"`. The more context you provide, the more accurately Gemini can break the work into meaningful line items.
+  Instead of `"design work"`, write `"UI/UX design for a three-screen mobile onboarding flow"`. The more context you provide, the more accurately the AI can break the work into meaningful line items.
 </Accordion>
 
 <Accordion title="Include quantities when relevant">
-  If you billed for a specific number of hours, sessions, or units, mention them explicitly. For example: `"5 hours of backend API consulting"` or `"3 rounds of logo revisions"`. This helps the AI populate the `quantity` field correctly.
+  If you billed for a specific number of hours, sessions, or units, mention them explicitly. For example: `"5 hours of backend API consulting"` or `"3 rounds of logo revisions"`. This helps populate the `quantity` field correctly.
 </Accordion>
 
 <Accordion title="Mention the currency in the description if needed">
@@ -113,14 +138,14 @@ The quality of the generated invoice depends heavily on how clearly you describe
 
 ## Saving AI-Generated Invoices
 
-The AI endpoint returns a transient invoice object. To save it and attach it to a client, follow this workflow:
+The `GET /api/invoices/ai` endpoint returns a transient invoice object. To save it and attach it to a client, follow this workflow:
 
 <Steps>
   <Step title="Generate the invoice with AI">
     Call `GET /api/invoices/ai` with your description, language, and currency. Capture the returned `items` array and `total`.
 
     ```bash
-    curl -X GET "http://localhost:8080/api/invoices/ai?\
+    curl -X GET "https://your-domain.com/api/invoices/ai?\
     description=5%20hours%20of%20backend%20API%20consulting&\
     lang=en&\
     devise=USD" \
@@ -133,14 +158,14 @@ The AI endpoint returns a transient invoice object. To save it and attach it to 
   </Step>
 
   <Step title="Persist the invoice with POST /api/invoices">
-    Send the reviewed data — along with a `clientId` and a `status` integer — to create the invoice in the database.
+    Send the reviewed data — along with a `client` reference and a `status` integer — to create the invoice.
 
     ```bash
-    curl -X POST "http://localhost:8080/api/invoices" \
+    curl -X POST "https://your-domain.com/api/invoices" \
       -H "Authorization: Bearer <token>" \
       -H "Content-Type: application/json" \
       -d '{
-        "clientId": 1,
+        "client": { "id": 1 },
         "status": 400,
         "items": [
           {

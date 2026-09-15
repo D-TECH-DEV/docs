@@ -1,7 +1,7 @@
 ---
-title: "Authenticate with the Invoksa API"
+title: "Authentication: JWT Tokens and OAuth2 Login — Invoksa"
 sidebarTitle: "Authentication"
-description: "Invoksa uses JWT Bearer tokens for authentication. Learn how to obtain your token, pass it in requests, and handle auth errors."
+description: "Invoksa uses JWT Bearer tokens to protect every endpoint. Learn how to log in, retrieve your token, use it in requests, and handle common auth errors."
 ---
 
 Invoksa protects every resource endpoint with **JWT Bearer token authentication**. When you log in, the API returns a signed token that you include in the `Authorization` header of subsequent requests. Tokens are stateless — the API verifies the signature on each request without hitting a session store. Each token is valid for **24 hours**, after which you must log in again to get a fresh one.
@@ -11,7 +11,7 @@ Invoksa protects every resource endpoint with **JWT Bearer token authentication*
 Call `POST /api/auth/login` with your email and password to receive a token:
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST https://your-domain.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "jane@example.com",
@@ -23,15 +23,23 @@ A successful login returns your user profile together with the token:
 
 ```json
 {
-  "id": 1,
-  "username": "jane",
-  "email": "jane@example.com",
-  "role": "USER",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqYW5lQGV4YW1wbGUuY29tIiwiaWF0IjoxNzA1MzEyMjAwLCJleHAiOjE3MDUzOTg2MDB9.abc123..."
+  "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqYW5lQGV4YW1wbGUuY29tIiwiaWF0IjoxNzA1MzEyMjAwLCJleHAiOjE3MDUzOTg2MDB9.abc123...",
+  "user": {
+    "id": 1,
+    "username": "jane",
+    "email": "jane@example.com",
+    "role": "ROLE_USER",
+    "emailVerified": true,
+    "createdAt": "2024-01-15T10:30:00"
+  }
 }
 ```
 
-Copy the `token` value — you'll need it for every authenticated request.
+<Note>
+  The `token` field is returned with a `Bearer ` prefix already included (e.g. `"Bearer eyJ..."`). When using this value in the `Authorization` header, strip the `Bearer ` prefix and supply only the raw JWT — the header itself requires the `Bearer ` scheme, so the final header looks like `Authorization: Bearer eyJ...`. Alternatively, you can pass the full value directly as the header value since it already contains the scheme.
+</Note>
+
+Copy the token — you'll need it for every authenticated request.
 
 ## Using Your Token
 
@@ -46,12 +54,12 @@ Here's how that looks on a real request — fetching your list of clients:
 <CodeGroup>
 
 ```bash curl
-curl http://localhost:8080/api/clients \
+curl https://your-domain.com/api/clients/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ```javascript JavaScript (fetch)
-const response = await fetch("http://localhost:8080/api/clients", {
+const response = await fetch("https://your-domain.com/api/clients/me", {
   method: "GET",
   headers: {
     "Authorization": `Bearer ${token}`,
@@ -63,8 +71,8 @@ const clients = await response.json();
 ```
 
 ```http HTTP
-GET /api/clients HTTP/1.1
-Host: localhost:8080
+GET /api/clients/me HTTP/1.1
+Host: your-domain.com
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 

@@ -1,7 +1,7 @@
 ---
 title: "Create and Manage Invoices in Invoksa"
 sidebarTitle: "Create Invoices"
-description: "Step-by-step guide to creating invoices with line items, updating status, and managing your invoice list in Invoksa."
+description: "Step-by-step guide to creating invoices with line items, updating invoice status, and managing your full invoice list in Invoksa using the REST API."
 ---
 
 Invoices in Invoksa are rich documents that include line items with descriptions, quantities, and prices. The API automatically calculates invoice numbers and generates a unique public token for each invoice. This guide walks you through creating, reading, updating, and deleting invoices.
@@ -35,7 +35,7 @@ Invoices in Invoksa are rich documents that include line items with descriptions
     Send the invoice payload in a `POST` request. The example below bills a client for web design and hosting services.
 
     ```bash
-    curl -X POST http://localhost:8080/api/invoices \
+    curl -X POST https://your-domain.com/api/invoices \
       -H "Authorization: Bearer YOUR_TOKEN" \
       -H "Content-Type: application/json" \
       -d '{
@@ -60,7 +60,7 @@ Invoices in Invoksa are rich documents that include line items with descriptions
     ```
   </Step>
   <Step title="Review the response">
-    A successful request returns `201 Created` with the full invoice object. Notice the auto-generated `number`, the human-readable `status` string, and the unique `token` for public sharing.
+    A successful request returns `200 OK` with the full invoice object. Notice the auto-generated `number`, the human-readable `status` string, and the unique `token` for public sharing.
 
     ```json
     {
@@ -114,7 +114,7 @@ When creating or updating an invoice, pass `status` as an **integer**. The API r
 Send a `PUT` request to `/api/invoices/{id}` to modify an existing invoice. The example below marks invoice 42 as paid.
 
 ```bash
-curl -X PUT http://localhost:8080/api/invoices/42 \
+curl -X PUT https://your-domain.com/api/invoices/42 \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -147,7 +147,7 @@ The response mirrors the full updated invoice object with `"status": "paid"`.
 Fetch a single invoice by its ID.
 
 ```bash
-curl -X GET http://localhost:8080/api/invoices/42 \
+curl -X GET https://your-domain.com/api/invoices/42 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -160,7 +160,7 @@ Returns the full invoice object as shown in the [Create response](#create-an-inv
 Retrieve all invoices belonging to your account.
 
 ```bash
-curl -X GET http://localhost:8080/api/invoices/me \
+curl -X GET https://your-domain.com/api/invoices/me \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -173,7 +173,7 @@ Returns an array of invoice objects. Use the `status` field to filter or sort in
 Send a `DELETE` request to permanently remove an invoice.
 
 ```bash
-curl -X DELETE http://localhost:8080/api/invoices/42 \
+curl -X DELETE https://your-domain.com/api/invoices/42 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

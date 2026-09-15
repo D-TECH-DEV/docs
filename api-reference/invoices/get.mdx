@@ -1,7 +1,7 @@
 ---
-title: "GET /api/invoices/{id} — Fetch a Single Invoice"
+title: "Retrieve a Single Invoice — GET /api/invoices/{id}"
 sidebarTitle: "Get Invoice"
-description: "GET /api/invoices/{id} — Retrieve a single invoice by its ID, including client details and all line items."
+description: "GET /api/invoices/{id} — Retrieve a single invoice by its numeric ID. Response includes the client profile, payment status, line items, and public token."
 ---
 
 Fetch a specific invoice using its numeric ID. The response includes the complete client profile, every line item, the current payment status, and the public token you can share with your client.
@@ -24,14 +24,14 @@ GET /api/invoices/{id}
 
 <CodeGroup>
 ```bash cURL
-curl "http://localhost:8080/api/invoices/42" \
+curl "https://your-domain.com/api/invoices/42" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 </CodeGroup>
 
 ## Response
 
-Returns the full `InvoiceResponse` object for the requested invoice.
+Returns the complete invoice object for the requested ID, including client details, line items, and public token.
 
 ```json
 {

@@ -1,7 +1,7 @@
 ---
-title: "PUT /api/invoices/{id} — Update an Invoice"
+title: "Update an Existing Invoice — PUT /api/invoices/{id}"
 sidebarTitle: "Update Invoice"
-description: "PUT /api/invoices/{id} — Modify an existing invoice's client, status, total, or line items. Returns the fully updated invoice."
+description: "PUT /api/invoices/{id} — Modify an existing invoice's client, status, total, or line items. Returns the complete updated invoice on success."
 ---
 
 Update any field on an existing invoice — change its payment status, reassign it to a different client, adjust the total, or replace its line items entirely. Send only the fields you want to modify alongside those you want to keep unchanged.
@@ -74,7 +74,7 @@ The following example marks invoice `42` as paid by changing the status from `40
 
 <CodeGroup>
 ```bash cURL
-curl -X PUT "http://localhost:8080/api/invoices/42" \
+curl -X PUT "https://your-domain.com/api/invoices/42" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -100,7 +100,7 @@ curl -X PUT "http://localhost:8080/api/invoices/42" \
 
 ## Response
 
-Returns the fully updated `InvoiceResponse` object.
+Returns the fully updated invoice object.
 
 ```json
 {

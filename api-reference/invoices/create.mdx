@@ -1,5 +1,5 @@
 ---
-title: "POST /api/invoices — Create a New Invoice"
+title: "Create a New Invoice With Line Items — POST /api/invoices"
 sidebarTitle: "Create Invoice"
 description: "POST /api/invoices — Create a new invoice with line items for one of your clients. Returns the complete invoice with auto-generated number and token."
 ---
@@ -66,7 +66,7 @@ POST /api/invoices
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/api/invoices" \
+curl -X POST "https://your-domain.com/api/invoices" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

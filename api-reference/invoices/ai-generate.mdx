@@ -1,12 +1,12 @@
 ---
-title: "GET /api/invoices/ai — Generate Invoice with AI"
+title: "AI Invoice Generation — /api/invoices/ai & /api/ia/invoice"
 sidebarTitle: "AI Generate"
-description: "GET /api/invoices/ai — Generate invoice line items from a plain-text description using AI. Specify language and currency for localized output."
+description: "Generate invoice line items from plain text using AI. /api/invoices/ai returns a structured invoice object; /api/ia/invoice returns a raw text string."
 ---
 
-Describe your work in plain English (or any supported language) and Invoksa uses Google Gemini to generate a structured invoice complete with line items, quantities, and prices — all in the currency and language you specify. Use this endpoint to turn a rough project summary into a ready-to-review invoice draft in seconds.
+Invoksa offers two AI-powered endpoints that turn a plain-text description of your work into structured invoice content. Describe the services you performed and the API suggests line items with quantities and prices — all in the language and currency you specify. Review the results before saving them as a real invoice.
 
-## Endpoint
+## Endpoint 1 — Structured Invoice Object
 
 ```
 GET /api/invoices/ai
@@ -14,7 +14,9 @@ GET /api/invoices/ai
 
 **Authorization:** `Bearer <token>` — required.
 
-## Query Parameters
+Returns a full invoice object with AI-populated line items, ready to review and save.
+
+### Query Parameters
 
 <ParamField query="description" type="string" required>
   Natural language description of the work performed. Be as specific as you like.
@@ -27,10 +29,10 @@ GET /api/invoices/ai
 </ParamField>
 
 <ParamField query="devise" type="string" required>
-  Currency code for pricing (e.g. `USD`, `EUR`, `GBP`). The AI uses this to set realistic price values.
+  Currency code for pricing (e.g. `USD`, `EUR`, `GBP`). The AI uses this to suggest realistic price values.
 </ParamField>
 
-## Example Request
+### Example Request
 
 <CodeGroup>
 ```bash cURL
@@ -42,9 +44,9 @@ curl -G "https://your-domain.com/api/invoices/ai" \
 ```
 </CodeGroup>
 
-## Response
+### Response
 
-Returns an `InvoiceResponse`-shaped object with AI-populated `items`. The `id`, `number`, and `token` fields are **not** persisted — this result is transient until you save it.
+Returns an invoice object with AI-populated `items`. The `id`, `number`, and `token` fields are **not** persisted — this result is transient until you save it.
 
 ```json
 {
@@ -93,6 +95,55 @@ Returns an `InvoiceResponse`-shaped object with AI-populated `items`. The `id`, 
 <Note>
   This endpoint returns a **transient result** — nothing is saved to your account. To persist the invoice, pass the returned `items` and `total` to [POST /api/invoices](/api-reference/invoices/create) along with a `client.id` and your chosen `status`.
 </Note>
+
+---
+
+## Endpoint 2 — Raw Text Response
+
+```
+GET /api/ia/invoice
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+A simpler AI endpoint that returns the generated invoice content as a plain text string rather than a structured JSON object. Useful for displaying a quick preview or processing the output yourself.
+
+### Query Parameters
+
+<ParamField query="description" type="string" required>
+  Natural language description of the work performed.
+
+  **Example:** `"Website redesign and 3 months of support"`
+</ParamField>
+
+<ParamField query="lang" type="string" required>
+  Language code for the generated content (e.g. `en`, `fr`, `de`, `es`).
+</ParamField>
+
+### Example Request
+
+<CodeGroup>
+```bash cURL
+curl -G "https://your-domain.com/api/ia/invoice" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  --data-urlencode "description=Website redesign and 3 months of support" \
+  --data-urlencode "lang=en"
+```
+</CodeGroup>
+
+### Response
+
+Returns a plain text string containing the AI-generated invoice content.
+
+```
+Content-Type: text/plain
+
+1x Website redesign — $2,000.00
+3x Monthly support — $300.00
+Total: $2,900.00
+```
+
+---
 
 <Warning>
   Always review AI-generated line items and amounts before sending an invoice to a client. AI suggestions may not reflect your actual rates or the full scope of work performed.

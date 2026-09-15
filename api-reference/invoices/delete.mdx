@@ -1,7 +1,7 @@
 ---
-title: "DELETE /api/invoices/{id} — Delete an Invoice"
+title: "Permanently Delete an Invoice — DELETE /api/invoices/{id}"
 sidebarTitle: "Delete Invoice"
-description: "DELETE /api/invoices/{id} — Permanently remove an invoice from your account. Returns 204 No Content on success."
+description: "DELETE /api/invoices/{id} — Permanently remove an invoice and all its line items from your account. Returns HTTP 204 No Content on success."
 ---
 
 Permanently delete an invoice from your account. Once deleted, the invoice — including all its line items and the associated public token — cannot be recovered. Make sure you no longer need this record before proceeding.
@@ -24,7 +24,7 @@ DELETE /api/invoices/{id}
 
 <CodeGroup>
 ```bash cURL
-curl -X DELETE "http://localhost:8080/api/invoices/42" \
+curl -X DELETE "https://your-domain.com/api/invoices/42" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 </CodeGroup>

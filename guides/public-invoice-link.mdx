@@ -1,7 +1,7 @@
 ---
 title: "Share Invoices with a Public Link"
 sidebarTitle: "Public Invoice Link"
-description: "Every Invoksa invoice has a unique public link that lets clients view their invoice in a browser without logging in."
+description: "Every Invoksa invoice has a unique public link. Share it with your clients so they can view their invoice in any browser without needing an account."
 ---
 
 Each invoice in Invoksa carries a unique `token` field that enables a public, no-authentication-required view of that invoice. This is the easiest way to share an invoice with a client — simply send them the URL and they can open it directly in any browser, no Invoksa account needed.
@@ -10,7 +10,7 @@ Each invoice in Invoksa carries a unique `token` field that enables a public, no
 
 Every time you create or retrieve an invoice, the response includes a `token` field. This token is generated automatically and is unique to that invoice.
 
-Here's a sample `InvoiceResponse` — notice the `token` field:
+Here's a sample invoice API response — notice the `token` field:
 
 ```json {11}
 {

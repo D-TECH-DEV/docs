@@ -43,7 +43,7 @@ Authorization: Bearer <token>
 <CodeGroup>
 
 ```bash cURL
-curl -X POST http://localhost:8080/api/clients \
+curl -X POST https://your-domain.com/api/clients \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -80,7 +80,7 @@ Returns the newly created client object.
   The client's mailing or billing address.
 </ResponseField>
 
-```json Example Response — 201 Created
+```json Example Response — 200 OK
 {
   "id": 1,
   "name": "Acme Corp",

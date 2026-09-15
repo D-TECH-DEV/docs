@@ -1,10 +1,10 @@
 ---
-title: "POST /api/auth/register — Create an Account"
+title: "Register a New Invoksa Account — Auth API Reference"
 sidebarTitle: "Register"
-description: "POST /api/auth/register — Create a new Invoksa account. Accepts username, email, and password. Returns the new user object."
+description: "POST /api/auth/register — Create a new Invoksa account with a username, email, and password. Returns the new user object on success."
 ---
 
-Use this endpoint to register a new Invoksa account. After registration, Invoksa sends a verification email to the address you provide — you must verify your email before you can log in for the first time.
+Use this endpoint to create a new Invoksa account. Provide a username, a valid email address, and a password of at least 6 characters. After registration, Invoksa automatically sends a verification email to the address you provided — you must confirm your email before you can log in for the first time.
 
 ## Endpoint
 
@@ -52,7 +52,7 @@ curl -X POST https://your-domain.com/api/auth/register \
 
 ## Response
 
-A successful request returns the newly created user object.
+A successful request returns **HTTP 200** with the newly created user object.
 
 <ResponseField name="id" type="integer">
   The unique numeric identifier for your account.
@@ -102,11 +102,11 @@ A successful request returns the newly created user object.
 
 | Status | Meaning |
 |--------|---------|
-| `400 Bad Request` | One or more fields failed validation (e.g. password too short, malformed email). |
-| `409 Conflict` | The provided email address is already registered to an existing account. |
+| `400 Bad Request` | One or more fields failed validation (e.g. password too short, malformed email, missing required field). |
+| `500 Internal Server Error` | The provided email address is already registered to an existing account. |
 
 ---
 
 <Note>
-  Email verification is required before your first login. Check your inbox for a message from Invoksa and follow the link to confirm your address. See [Verify Email](/api-reference/auth/verify-email) for details on the verification endpoint.
+  A verification email is sent automatically after registration. The link in the email is valid for **15 minutes** — if it expires, you will need to register again or contact support. Once verified, you can log in using [POST /api/auth/login](/api-reference/auth/login).
 </Note>

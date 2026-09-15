@@ -1,10 +1,10 @@
 ---
-title: "POST /api/auth/login — Authenticate and Get Token"
+title: "Invoksa Login: Authenticate and Get a JWT Bearer Token"
 sidebarTitle: "Login"
-description: "POST /api/auth/login — Authenticate with your email and password to receive a JWT Bearer token for API access."
+description: "POST /api/auth/login — Authenticate with your email and password to receive a JWT Bearer token for API access. Tokens are valid for 24 hours."
 ---
 
-Log in with your email and password to receive a JWT Bearer token. Pass this token in the `Authorization: Bearer <token>` header on every subsequent authenticated request. Tokens are valid for 24 hours — after expiry you must log in again to obtain a new one.
+Log in with your email and password to receive a JWT token. Include this token in the `Authorization: Bearer <token>` header on every subsequent authenticated request. Tokens are valid for **24 hours** — after expiry you must log in again to obtain a fresh one.
 
 ## Endpoint
 
@@ -43,42 +43,65 @@ curl -X POST https://your-domain.com/api/auth/login \
 
 ## Response
 
-A successful request returns a JWT token alongside your account details.
+A successful request returns **HTTP 200** with a `token` and a nested `user` object containing your account details.
 
 <ResponseField name="token" type="string">
-  Your JWT Bearer token. Use this value in the `Authorization` header for all authenticated API calls.
+  Your JWT token. Use this value directly in the `Authorization` header as `Bearer <token>` for all authenticated API calls.
 </ResponseField>
 
-<ResponseField name="id" type="integer">
-  The unique numeric identifier for your account.
-</ResponseField>
+<ResponseField name="user" type="object">
+  An object containing the details of the authenticated account.
 
-<ResponseField name="username" type="string">
-  Your account display name.
-</ResponseField>
+  <Expandable title="user fields">
+    <ResponseField name="user.id" type="integer">
+      The unique numeric identifier for your account.
+    </ResponseField>
 
-<ResponseField name="email" type="string">
-  The email address associated with your account.
-</ResponseField>
+    <ResponseField name="user.username" type="string">
+      Your account display name.
+    </ResponseField>
 
-<ResponseField name="role" type="string">
-  The role assigned to your account (e.g. `ROLE_USER`).
+    <ResponseField name="user.email" type="string">
+      The email address associated with your account.
+    </ResponseField>
+
+    <ResponseField name="user.role" type="string">
+      The role assigned to your account (e.g. `ROLE_USER`).
+    </ResponseField>
+
+    <ResponseField name="user.emailVerified" type="boolean">
+      Whether your email address has been confirmed.
+    </ResponseField>
+
+    <ResponseField name="user.createdAt" type="string">
+      ISO 8601 timestamp of when the account was created.
+    </ResponseField>
+
+    <ResponseField name="user.updatedAt" type="string">
+      ISO 8601 timestamp of the last account update.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ### Response Example
 
 ```json
 {
-  "token": "Bearer eyJhbGciOiJIUzI1NiJ9...",
-  "id": 1,
-  "username": "jane_doe",
-  "email": "jane@example.com",
-  "role": "ROLE_USER"
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9VU0VSIiwic3ViIjoiamFuZUBleGFtcGxlLmNvbSJ9...",
+  "user": {
+    "id": 1,
+    "username": "jane_doe",
+    "email": "jane@example.com",
+    "role": "ROLE_USER",
+    "emailVerified": true,
+    "createdAt": "2024-01-15T10:30:00",
+    "updatedAt": "2024-01-15T10:30:00"
+  }
 }
 ```
 
 <Tip>
-  The `token` field may include a `Bearer ` prefix. Strip it before constructing your header, then send requests as:
+  Store the `token` value from the response and attach it to every authenticated request using the `Authorization` header:
 
   ```
   Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
@@ -89,7 +112,7 @@ A successful request returns a JWT token alongside your account details.
 
 ## Token Expiry
 
-Tokens are valid for **24 hours** from the moment of issue. Once a token expires, all authenticated requests will return `401 Unauthorized`. Log in again to receive a fresh token.
+Tokens are valid for **24 hours** from the moment of issue. Once a token expires, all authenticated requests return `401 Unauthorized`. Log in again to receive a fresh token.
 
 ---
 
@@ -97,5 +120,6 @@ Tokens are valid for **24 hours** from the moment of issue. Once a token expires
 
 | Status | Meaning |
 |--------|---------|
+| `400 Bad Request` | One or more fields failed validation (e.g. malformed email, missing password). |
 | `401 Unauthorized` | The email or password is incorrect. |
 | `403 Forbidden` | Your email address has not been verified yet. Check your inbox and complete the verification step before logging in. |
