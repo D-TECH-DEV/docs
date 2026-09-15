@@ -1,0 +1,104 @@
+---
+title: "PUT /api/clients/{id} — Update a Client"
+sidebarTitle: "Update Client"
+description: "PUT /api/clients/{id} — Update an existing client's name, email, phone, or address. Returns the updated client object."
+---
+
+Update any field on an existing client record — correct a misspelled name, add a missing phone number, or change a billing address — without recreating the client from scratch. Supply only the fields you want to change, or send the full object; Invoksa applies your values and returns the updated client.
+
+## Endpoint
+
+```
+PUT /api/clients/{id}
+```
+
+## Authentication
+
+All requests to this endpoint require a valid JWT Bearer token in the `Authorization` header.
+
+```
+Authorization: Bearer <token>
+```
+
+## Path Parameters
+
+<ParamField path="id" type="number" required>
+  The unique ID of the client you want to update. Retrieve this from the [List Clients](/api-reference/clients/list) endpoint.
+</ParamField>
+
+## Request Body
+
+<ParamField body="name" type="string">
+  The updated display name for the client.
+</ParamField>
+
+<ParamField body="email" type="string">
+  The updated email address for the client.
+</ParamField>
+
+<ParamField body="phone" type="string">
+  The updated phone number for the client.
+</ParamField>
+
+<ParamField body="address" type="string">
+  The updated mailing or billing address for the client.
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X PUT http://localhost:8080/api/clients/1 \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corporation",
+    "email": "invoices@acme.com",
+    "phone": "+1-555-0101",
+    "address": "456 Corporate Blvd, Springfield"
+  }'
+```
+
+</CodeGroup>
+
+## Response
+
+Returns the full client object reflecting the applied updates.
+
+<ResponseField name="id" type="number">
+  The unique identifier of the client (unchanged).
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The updated display name of the client.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The updated email address.
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  The updated phone number.
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  The updated mailing or billing address.
+</ResponseField>
+
+```json Example Response — 200 OK
+{
+  "id": 1,
+  "name": "Acme Corporation",
+  "email": "invoices@acme.com",
+  "phone": "+1-555-0101",
+  "address": "456 Corporate Blvd, Springfield"
+}
+```
+
+## Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `401 Unauthorized` | The `Authorization` header is missing or the token is invalid/expired. |
+| `404 Not Found` | No client with the given `id` exists on your account. |

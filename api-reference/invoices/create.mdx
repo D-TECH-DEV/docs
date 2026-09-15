@@ -1,0 +1,186 @@
+---
+title: "POST /api/invoices — Create a New Invoice"
+sidebarTitle: "Create Invoice"
+description: "POST /api/invoices — Create a new invoice with line items for one of your clients. Returns the complete invoice with auto-generated number and token."
+---
+
+Create an invoice by specifying a client, one or more line items, and a status. Invoksa automatically assigns a sequential invoice number and generates a unique public token you can share with your client.
+
+## Endpoint
+
+```
+POST /api/invoices
+```
+
+**Authorization:** `Bearer <token>` — required on all invoice endpoints.
+
+## Request Body
+
+<ParamField body="client" type="object" required>
+  The client to associate with this invoice.
+
+  <Expandable title="client fields">
+    <ParamField body="id" type="integer" required>
+      The numeric ID of an existing client in your account.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="status" type="integer" required>
+  Invoice payment status. Pass one of the following integer codes:
+
+  | Value | Meaning |
+  |-------|---------|
+  | `200` | `paid` |
+  | `400` | `unpaid` |
+  | `500` | `pending` |
+</ParamField>
+
+<ParamField body="total" type="number">
+  Total amount for the invoice. If omitted, the server computes the sum from your line items.
+</ParamField>
+
+<ParamField body="items" type="array" required>
+  Array of line items included in the invoice.
+
+  <Expandable title="items[] fields">
+    <ParamField body="description" type="string">
+      A short description of the product or service.
+    </ParamField>
+
+    <ParamField body="quantity" type="integer">
+      Number of units.
+    </ParamField>
+
+    <ParamField body="price" type="number">
+      Unit price for this item.
+    </ParamField>
+
+    <ParamField body="total" type="number">
+      Line total (`quantity × price`). You may compute this yourself or let the server derive it.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/api/invoices" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client": { "id": 1 },
+    "status": 400,
+    "items": [
+      {
+        "description": "Web design",
+        "quantity": 1,
+        "price": 1000.00,
+        "total": 1000.00
+      },
+      {
+        "description": "Hosting (1 year)",
+        "quantity": 1,
+        "price": 500.00,
+        "total": 500.00
+      }
+    ]
+  }'
+```
+</CodeGroup>
+
+## Response
+
+Returns the newly created invoice, including the auto-generated `number` and `token`.
+
+<Note>
+  The `number` field (e.g. `INV-2024-042`) and the `token` field are generated automatically by the server — you do not need to supply them.
+</Note>
+
+```json
+{
+  "id": 42,
+  "number": "INV-2024-042",
+  "client": {
+    "id": 1,
+    "name": "Acme Corp",
+    "email": "billing@acme.com",
+    "phone": "+1-555-0100",
+    "address": "123 Main St"
+  },
+  "total": 1500.00,
+  "status": "unpaid",
+  "token": "abc123xyz456",
+  "createdAt": "2024-01-15T10:30:00",
+  "updatedAt": "2024-01-15T10:30:00",
+  "items": [
+    {
+      "id": 1,
+      "description": "Web design",
+      "quantity": 1,
+      "price": 1000.00,
+      "total": 1000.00
+    },
+    {
+      "id": 2,
+      "description": "Hosting (1 year)",
+      "quantity": 1,
+      "price": 500.00,
+      "total": 500.00
+    }
+  ]
+}
+```
+
+<ResponseField name="id" type="integer">
+  Unique numeric identifier of the invoice.
+</ResponseField>
+
+<ResponseField name="number" type="string">
+  Auto-generated invoice number (e.g. `INV-2024-042`).
+</ResponseField>
+
+<ResponseField name="client" type="object">
+  The client associated with this invoice.
+
+  <Expandable title="client fields">
+    <ResponseField name="id" type="integer">Client ID.</ResponseField>
+    <ResponseField name="name" type="string">Client display name.</ResponseField>
+    <ResponseField name="email" type="string">Client email address.</ResponseField>
+    <ResponseField name="phone" type="string">Client phone number.</ResponseField>
+    <ResponseField name="address" type="string">Client mailing address.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="total" type="number">
+  Total amount of the invoice.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Human-readable payment status: `"paid"`, `"unpaid"`, or `"pending"`.
+</ResponseField>
+
+<ResponseField name="token" type="string">
+  Auto-generated unique token used to construct the public invoice link (`/api/i/{token}`).
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of when the invoice was created.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of the last update.
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array of line items attached to the invoice.
+
+  <Expandable title="items[] fields">
+    <ResponseField name="id" type="integer">Line item ID.</ResponseField>
+    <ResponseField name="description" type="string">Description of the product or service.</ResponseField>
+    <ResponseField name="quantity" type="integer">Number of units.</ResponseField>
+    <ResponseField name="price" type="number">Unit price.</ResponseField>
+    <ResponseField name="total" type="number">Line total.</ResponseField>
+  </Expandable>
+</ResponseField>

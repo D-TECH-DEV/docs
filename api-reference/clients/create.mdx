@@ -1,0 +1,97 @@
+---
+title: "POST /api/clients — Create a New Client"
+sidebarTitle: "Create Client"
+description: "POST /api/clients — Add a new client to your Invoksa account. Accepts name, email, phone, and address. Returns the created client object."
+---
+
+Before you can issue invoices, you need a client record to attach them to. This endpoint adds a new client to your Invoksa account and returns the created object — including the system-assigned `id` you'll use in all future invoice and client requests.
+
+## Endpoint
+
+```
+POST /api/clients
+```
+
+## Authentication
+
+All requests to this endpoint require a valid JWT Bearer token in the `Authorization` header.
+
+```
+Authorization: Bearer <token>
+```
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+  The display name for the client (e.g. a company name or individual's full name).
+</ParamField>
+
+<ParamField body="email" type="string">
+  The client's email address. Used for invoice delivery and correspondence.
+</ParamField>
+
+<ParamField body="phone" type="string">
+  The client's phone number, in any format (e.g. `+1-555-0100`).
+</ParamField>
+
+<ParamField body="address" type="string">
+  The client's mailing or billing address.
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST http://localhost:8080/api/clients \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corp",
+    "email": "billing@acme.com",
+    "phone": "+1-555-0100",
+    "address": "123 Main St, Springfield"
+  }'
+```
+
+</CodeGroup>
+
+## Response
+
+Returns the newly created client object.
+
+<ResponseField name="id" type="number">
+  The unique identifier assigned to this client by Invoksa.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The display name of the client.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The client's email address.
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  The client's phone number.
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  The client's mailing or billing address.
+</ResponseField>
+
+```json Example Response — 201 Created
+{
+  "id": 1,
+  "name": "Acme Corp",
+  "email": "billing@acme.com",
+  "phone": "+1-555-0100",
+  "address": "123 Main St, Springfield"
+}
+```
+
+## Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `401 Unauthorized` | The `Authorization` header is missing or the token is invalid/expired. |

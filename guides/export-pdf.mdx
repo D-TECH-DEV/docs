@@ -1,0 +1,78 @@
+---
+title: "Export Invoices as PDF with Custom Branding"
+sidebarTitle: "Export PDF"
+description: "Download a branded PDF version of any invoice using Invoksa's PDF export endpoint. Customize colors, company details, and legal mentions."
+---
+
+Invoksa generates professional PDF invoices with your company branding baked in. Using a single endpoint, you can customize the accent color, display your company name, contact details, and append legal mentions — all without editing the invoice itself. The PDF is returned as a downloadable binary file, ready to email or archive.
+
+## Endpoint
+
+```
+GET /api/invoices/{id}/pdf
+```
+
+This endpoint requires a valid Bearer token. Replace `{id}` with the numeric ID of the invoice you want to export.
+
+**Returns:** A PDF binary file with:
+- `Content-Type: application/pdf`
+- `Content-Disposition: attachment; filename=facture_{id}.pdf`
+
+---
+
+## Query Parameters
+
+Customize the generated PDF by appending any of the following query parameters. All parameters are optional — omit them to generate a plain PDF using the invoice data only.
+
+<ParamField query="color" type="string">
+  Hex color code used for the invoice accent color (e.g. `#00bcff`). Remember to URL-encode the `#` character as `%23`.
+</ParamField>
+
+<ParamField query="name" type="string">
+  Your company or personal name as it should appear on the invoice header.
+</ParamField>
+
+<ParamField query="tel" type="string">
+  Phone number displayed in your sender details on the invoice.
+</ParamField>
+
+<ParamField query="email" type="string">
+  Email address displayed in your sender details on the invoice.
+</ParamField>
+
+<ParamField query="address" type="string">
+  Business address displayed in your sender details on the invoice.
+</ParamField>
+
+<ParamField query="legalMentions" type="string">
+  Legal text printed at the bottom of the invoice — for example, VAT registration number, payment terms, or jurisdiction notices.
+</ParamField>
+
+---
+
+## Example
+
+The following command downloads a fully branded PDF for invoice `42` and saves it to `invoice_42.pdf` in your current directory.
+
+```bash
+curl -X GET "https://your-domain.com/api/invoices/42/pdf?color=%2300bcff&name=Acme+Corp&tel=%2B1-555-0100&email=billing@acme.com&address=123+Main+St&legalMentions=VAT+Reg+123" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  --output invoice_42.pdf
+```
+
+<Tip>
+  URL-encode any special characters in your query parameter values. The most common ones to watch out for are `#` → `%23`, `+` → `%2B`, `&` → `%26`, and spaces → `+` or `%20`. Most HTTP clients and libraries handle this automatically if you build the URL programmatically.
+</Tip>
+
+---
+
+## Response
+
+| Property            | Value                                       |
+|---------------------|---------------------------------------------|
+| HTTP status         | `200 OK`                                    |
+| `Content-Type`      | `application/pdf`                           |
+| `Content-Disposition` | `attachment; filename=facture_{id}.pdf`   |
+| Body                | Raw PDF binary                              |
+
+If the invoice ID does not exist or does not belong to your account, the API returns `404 Not Found`.

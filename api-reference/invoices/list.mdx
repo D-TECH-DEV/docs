@@ -1,0 +1,96 @@
+---
+title: "GET /api/invoices/me — List Your Invoices"
+sidebarTitle: "List Invoices"
+description: "GET /api/invoices/me — Retrieve all invoices belonging to your account. Returns an array of invoice objects with client and line item details."
+---
+
+Retrieve every invoice associated with your account in a single call. Each object in the response includes the full client profile, computed totals, current status, and all line items. To narrow results to a single client, use the `/api/invoices/client/{id}` variant described below.
+
+## Endpoint
+
+```
+GET /api/invoices/me
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+## Parameters
+
+This endpoint accepts no query parameters or request body.
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "http://localhost:8080/api/invoices/me" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</CodeGroup>
+
+## Response
+
+Returns a JSON array of invoice objects. Each element follows the full `InvoiceResponse` shape.
+
+```json
+[
+  {
+    "id": 42,
+    "number": "INV-2024-042",
+    "client": {
+      "id": 1,
+      "name": "Acme Corp",
+      "email": "billing@acme.com",
+      "phone": "+1-555-0100",
+      "address": "123 Main St"
+    },
+    "total": 1500.00,
+    "status": "unpaid",
+    "token": "abc123xyz456",
+    "createdAt": "2024-01-15T10:30:00",
+    "updatedAt": "2024-01-15T10:30:00",
+    "items": [
+      {
+        "id": 1,
+        "description": "Web design",
+        "quantity": 1,
+        "price": 1000.00,
+        "total": 1000.00
+      },
+      {
+        "id": 2,
+        "description": "Hosting (1 year)",
+        "quantity": 1,
+        "price": 500.00,
+        "total": 500.00
+      }
+    ]
+  }
+]
+```
+
+---
+
+## Filter by Client
+
+To retrieve only the invoices belonging to a specific client, use:
+
+```
+GET /api/invoices/client/{id}
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+<ParamField path="id" type="integer" required>
+  The numeric ID of the client whose invoices you want to retrieve.
+</ParamField>
+
+### Example Request
+
+<CodeGroup>
+```bash cURL
+curl "http://localhost:8080/api/invoices/client/1" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</CodeGroup>
+
+The response follows the same array-of-invoices format as `/api/invoices/me`, filtered to the specified client.

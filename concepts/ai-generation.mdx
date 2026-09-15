@@ -1,0 +1,165 @@
+---
+title: "AI Invoice Generation from Natural Language"
+sidebarTitle: "AI Generation"
+description: "Invoksa can generate invoice line items from a plain-text description using Google Gemini AI. Learn how AI generation works and how to use it effectively."
+---
+
+Invoksa integrates Google Gemini AI to turn plain-language descriptions into fully structured invoice data — complete with line items, quantities, unit prices, and a calculated total. Instead of manually building each line item, you describe the work you did and let the AI draft the invoice structure for you to review and save.
+
+---
+
+## How It Works
+
+When you call the AI generation endpoint, Invoksa sends your description to Google Gemini along with your preferred language and currency. Gemini interprets the description and returns a structured invoice object containing:
+
+- One or more line items, each with a `description`, `quantity`, and `price`
+- A computed `total` per line item and an overall invoice `total`
+
+The result is a **transient invoice** — it exists only in the API response and is not saved to the database. You must explicitly call `POST /api/invoices` with the returned data to persist it.
+
+---
+
+## AI Generation Endpoint
+
+Send a `GET` request to `/api/invoices/ai` with three required query parameters:
+
+<ParamField query="description" type="string" required>
+  A plain-text description of the services or products to invoice. Be as specific as possible for the best results.
+</ParamField>
+
+<ParamField query="lang" type="string" required>
+  The language for the generated line item descriptions (for example, `en`, `fr`, `es`).
+</ParamField>
+
+<ParamField query="devise" type="string" required>
+  The currency code for pricing (for example, `USD`, `EUR`, `GBP`).
+</ParamField>
+
+**Example request**
+
+```bash
+curl -X GET "http://localhost:8080/api/invoices/ai?\
+description=Logo%20design%20and%20brand%20identity%20package&\
+lang=en&\
+devise=USD" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Example response**
+
+```json
+{
+  "id": null,
+  "number": null,
+  "client": null,
+  "total": 2350.00,
+  "status": "unpaid",
+  "token": null,
+  "createdAt": null,
+  "updatedAt": null,
+  "items": [
+    {
+      "id": null,
+      "description": "Logo design concepts and revisions",
+      "quantity": 1,
+      "price": 800.00,
+      "total": 800.00
+    },
+    {
+      "id": null,
+      "description": "Brand identity guidelines document",
+      "quantity": 1,
+      "price": 950.00,
+      "total": 950.00
+    },
+    {
+      "id": null,
+      "description": "Business card and letterhead design",
+      "quantity": 3,
+      "price": 200.00,
+      "total": 600.00
+    }
+  ]
+}
+```
+
+<Note>
+  Fields like `id`, `number`, `client`, and `token` are `null` in the AI response because the invoice has not been saved yet. They are populated once you persist the invoice with `POST /api/invoices`.
+</Note>
+
+---
+
+## Writing Good Descriptions
+
+The quality of the generated invoice depends heavily on how clearly you describe the work. Follow these tips to get accurate, usable results:
+
+<Accordion title="Be specific about services rendered">
+  Instead of `"design work"`, write `"UI/UX design for a three-screen mobile onboarding flow"`. The more context you provide, the more accurately Gemini can break the work into meaningful line items.
+</Accordion>
+
+<Accordion title="Include quantities when relevant">
+  If you billed for a specific number of hours, sessions, or units, mention them explicitly. For example: `"5 hours of backend API consulting"` or `"3 rounds of logo revisions"`. This helps the AI populate the `quantity` field correctly.
+</Accordion>
+
+<Accordion title="Mention the currency in the description if needed">
+  The `devise` parameter sets the currency, but if your description references specific amounts (for example, `"agreed rate of €150/hour"`), include them so the AI can use realistic pricing.
+</Accordion>
+
+<Accordion title="Specify language for item descriptions">
+  Use the `lang` parameter to control the language of line item text. If you set `lang=fr`, the generated `description` fields in the items array will be in French — useful when your clients expect invoices in their own language.
+</Accordion>
+
+---
+
+## Saving AI-Generated Invoices
+
+The AI endpoint returns a transient invoice object. To save it and attach it to a client, follow this workflow:
+
+<Steps>
+  <Step title="Generate the invoice with AI">
+    Call `GET /api/invoices/ai` with your description, language, and currency. Capture the returned `items` array and `total`.
+
+    ```bash
+    curl -X GET "http://localhost:8080/api/invoices/ai?\
+    description=5%20hours%20of%20backend%20API%20consulting&\
+    lang=en&\
+    devise=USD" \
+      -H "Authorization: Bearer <token>"
+    ```
+  </Step>
+
+  <Step title="Review the generated items">
+    Check each line item's `description`, `quantity`, and `price` for accuracy. Adjust any values that don't match your actual work before saving.
+  </Step>
+
+  <Step title="Persist the invoice with POST /api/invoices">
+    Send the reviewed data — along with a `clientId` and a `status` integer — to create the invoice in the database.
+
+    ```bash
+    curl -X POST "http://localhost:8080/api/invoices" \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "clientId": 1,
+        "status": 400,
+        "items": [
+          {
+            "description": "Backend API consulting",
+            "quantity": 5,
+            "price": 150.00
+          }
+        ]
+      }'
+    ```
+
+    The response includes a fully populated invoice with an assigned `id`, `number`, and `token`.
+  </Step>
+
+  <Step title="Share or export the saved invoice">
+    Use the returned `token` to share a public link (`/api/i/{token}`) or call `GET /api/invoices/{id}/pdf` to download a PDF.
+  </Step>
+</Steps>
+
+<Note>
+  AI responses may vary between requests, even for identical descriptions. Always review the generated line items and totals carefully before sending an invoice to a client.
+</Note>

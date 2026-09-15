@@ -1,0 +1,49 @@
+---
+title: "DELETE /api/invoices/{id} — Delete an Invoice"
+sidebarTitle: "Delete Invoice"
+description: "DELETE /api/invoices/{id} — Permanently remove an invoice from your account. Returns 204 No Content on success."
+---
+
+Permanently delete an invoice from your account. Once deleted, the invoice — including all its line items and the associated public token — cannot be recovered. Make sure you no longer need this record before proceeding.
+
+## Endpoint
+
+```
+DELETE /api/invoices/{id}
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+## Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The numeric ID of the invoice to delete.
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "http://localhost:8080/api/invoices/42" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</CodeGroup>
+
+## Response
+
+On success, the server returns **`204 No Content`** with an empty body.
+
+```
+HTTP/1.1 204 No Content
+```
+
+<Warning>
+  Deletion is **permanent and irreversible**. If you need a record of the invoice for your files, [download the PDF](/api-reference/invoices/pdf) before deleting.
+</Warning>
+
+## Error Responses
+
+| Status | Meaning |
+|--------|---------|
+| `401 Unauthorized` | Missing or invalid Bearer token. |
+| `404 Not Found` | No invoice with the given ID exists on your account. |

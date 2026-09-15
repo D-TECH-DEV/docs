@@ -1,0 +1,112 @@
+---
+title: "POST /api/auth/register — Create an Account"
+sidebarTitle: "Register"
+description: "POST /api/auth/register — Create a new Invoksa account. Accepts username, email, and password. Returns the new user object."
+---
+
+Use this endpoint to register a new Invoksa account. After registration, Invoksa sends a verification email to the address you provide — you must verify your email before you can log in for the first time.
+
+## Endpoint
+
+```
+POST /api/auth/register
+```
+
+**Authentication:** None required
+
+---
+
+## Request Body
+
+<ParamField body="username" type="string" required>
+  Your display name shown across the Invoksa interface.
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  A valid email address. Must be unique — registration fails if the address is already associated with an existing account.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Your account password. Minimum 6 characters.
+</ParamField>
+
+<ParamField body="role" type="string">
+  Account role. Defaults to `ROLE_USER` if omitted.
+</ParamField>
+
+---
+
+## Request Example
+
+```bash
+curl -X POST https://your-domain.com/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "jane_doe",
+    "email": "jane@example.com",
+    "password": "securepass"
+  }'
+```
+
+---
+
+## Response
+
+A successful request returns the newly created user object.
+
+<ResponseField name="id" type="integer">
+  The unique numeric identifier for your account.
+</ResponseField>
+
+<ResponseField name="username" type="string">
+  The display name you registered with.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The email address associated with your account.
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  The role assigned to your account (e.g. `ROLE_USER`).
+</ResponseField>
+
+<ResponseField name="emailVerified" type="boolean">
+  Whether your email address has been confirmed. Always `false` immediately after registration.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of when the account was created.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of the last account update.
+</ResponseField>
+
+### Response Example
+
+```json
+{
+  "id": 1,
+  "username": "jane_doe",
+  "email": "jane@example.com",
+  "role": "ROLE_USER",
+  "emailVerified": false,
+  "createdAt": "2024-01-15T10:30:00",
+  "updatedAt": "2024-01-15T10:30:00"
+}
+```
+
+---
+
+## Errors
+
+| Status | Meaning |
+|--------|---------|
+| `400 Bad Request` | One or more fields failed validation (e.g. password too short, malformed email). |
+| `409 Conflict` | The provided email address is already registered to an existing account. |
+
+---
+
+<Note>
+  Email verification is required before your first login. Check your inbox for a message from Invoksa and follow the link to confirm your address. See [Verify Email](/api-reference/auth/verify-email) for details on the verification endpoint.
+</Note>

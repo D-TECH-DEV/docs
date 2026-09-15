@@ -1,0 +1,119 @@
+---
+title: "Clients: Managing Your Customer Records"
+sidebarTitle: "Clients"
+description: "Clients are the contacts you invoice in Invoksa. Learn about the client object, how clients relate to invoices, and how they are scoped to your account."
+---
+
+Clients represent the businesses or individuals you invoice. Before you can create an invoice in Invoksa, you need a client record to associate it with. Every client you create is scoped exclusively to your user account — other users on the same Invoksa instance cannot see or access your clients.
+
+---
+
+## The Client Object
+
+When the API returns a client, it has the following fields:
+
+<ResponseField name="id" type="number" required>
+  The unique numeric identifier for this client. Use this value when creating invoices or fetching client-specific invoice lists.
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  The full name or business name of the client (for example, `"Acme Corporation"` or `"Jane Smith"`).
+</ResponseField>
+
+<ResponseField name="email" type="string" required>
+  The client's primary email address. This appears on generated invoices and PDFs.
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  The client's phone number.
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  The client's billing or mailing address. This value is included on PDF exports.
+</ResponseField>
+
+---
+
+## Client Scoping
+
+Your clients are private to your account. Use the `/me` endpoint to retrieve only the clients that belong to your authenticated user:
+
+```bash
+GET /api/clients/me
+Authorization: Bearer <token>
+```
+
+**Example response**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Acme Corporation",
+    "email": "billing@acme.com",
+    "phone": "+1 555 000 1234",
+    "address": "100 Main Street, Springfield, USA"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "phone": "+44 20 7946 0958",
+    "address": "12 Baker Street, London, UK"
+  }
+]
+```
+
+No other authenticated user can read, modify, or delete your client records. Client data is always isolated at the account level.
+
+---
+
+## Clients and Invoices
+
+Every invoice in Invoksa references exactly one client. You must create the client record first, then supply the client's `id` in the request body when creating an invoice.
+
+```bash
+# 1. Create the client
+POST /api/clients
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Acme Corporation",
+  "email": "billing@acme.com",
+  "phone": "+1 555 000 1234",
+  "address": "100 Main Street, Springfield, USA"
+}
+
+# 2. Use the returned client id when creating an invoice
+POST /api/invoices
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "clientId": 1,
+  "status": 400,
+  "items": [
+    { "description": "Web development", "quantity": 10, "price": 150.00 }
+  ]
+}
+```
+
+To fetch all invoices associated with a particular client, use:
+
+```bash
+GET /api/invoices/client/{id}
+Authorization: Bearer <token>
+```
+
+Replace `{id}` with the numeric ID of the client. This is useful for displaying a full billing history for a single customer.
+
+---
+
+## Client Deletion
+
+You can delete a client by calling `DELETE /api/clients/{id}`. Before you do, consider the impact on any invoices that reference that client.
+
+<Warning>
+  Deleting a client may affect all invoices associated with that client. Review and update or archive any outstanding invoices before removing the client record to avoid losing billing history or breaking existing shareable invoice links.
+</Warning>

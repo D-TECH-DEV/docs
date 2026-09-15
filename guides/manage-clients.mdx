@@ -1,0 +1,135 @@
+---
+title: "Manage Clients in Invoksa"
+sidebarTitle: "Manage Clients"
+description: "Learn how to create, update, list, and delete clients in Invoksa. Clients are the contacts you create invoices for."
+---
+
+In Invoksa, clients are the people or businesses you invoice. Every invoice must be linked to a client, so you need at least one client in your account before you can create your first invoice. This guide walks you through every client operation: creating, listing, updating, and deleting.
+
+## Create a Client
+
+<Steps>
+  <Step title="Get a valid JWT token">
+    All client endpoints require authentication. If you haven't authenticated yet, send a `POST /api/auth/login` request first and copy the `token` from the response. See the [Authentication](/authentication) page for details.
+  </Step>
+  <Step title="Send the create request">
+    Send a `POST` request to `/api/clients` with your client's details in the request body.
+
+    ```bash
+    curl -X POST http://localhost:8080/api/clients \
+      -H "Authorization: Bearer YOUR_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "Acme Corporation",
+        "email": "billing@acme.com",
+        "phone": "+1-555-0100",
+        "address": "123 Main Street, Springfield, IL 62701"
+      }'
+    ```
+  </Step>
+  <Step title="Review the response">
+    A successful request returns `201 Created` with the new client object.
+
+    ```json
+    {
+      "id": 7,
+      "name": "Acme Corporation",
+      "email": "billing@acme.com",
+      "phone": "+1-555-0100",
+      "address": "123 Main Street, Springfield, IL 62701"
+    }
+    ```
+
+    Save the `id` — you'll need it when creating invoices for this client.
+  </Step>
+</Steps>
+
+---
+
+## List Your Clients
+
+Retrieve all clients associated with your account by calling `GET /api/clients/me`.
+
+```bash
+curl -X GET http://localhost:8080/api/clients/me \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Example response:**
+
+```json
+[
+  {
+    "id": 7,
+    "name": "Acme Corporation",
+    "email": "billing@acme.com",
+    "phone": "+1-555-0100",
+    "address": "123 Main Street, Springfield, IL 62701"
+  },
+  {
+    "id": 8,
+    "name": "Globex Industries",
+    "email": "ap@globex.com",
+    "phone": "+1-555-0199",
+    "address": "742 Evergreen Terrace, Springfield, IL 62702"
+  }
+]
+```
+
+---
+
+## Update a Client
+
+Send a `PUT` request to `/api/clients/{id}` to update any fields on an existing client. Include all fields in the body — any field you omit will be cleared.
+
+```bash
+curl -X PUT http://localhost:8080/api/clients/7 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corporation",
+    "email": "finance@acme.com",
+    "phone": "+1-555-0101",
+    "address": "456 Corporate Blvd, Springfield, IL 62701"
+  }'
+```
+
+**Example response:**
+
+```json
+{
+  "id": 7,
+  "name": "Acme Corporation",
+  "email": "finance@acme.com",
+  "phone": "+1-555-0101",
+  "address": "456 Corporate Blvd, Springfield, IL 62701"
+}
+```
+
+---
+
+## Delete a Client
+
+Send a `DELETE` request to `/api/clients/{id}` to permanently remove a client.
+
+```bash
+curl -X DELETE http://localhost:8080/api/clients/7 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+A successful deletion returns `204 No Content` with an empty body.
+
+<Warning>
+  Deleting a client may also affect invoices associated with that client. Review and reassign or export any invoices linked to the client before deleting them.
+</Warning>
+
+---
+
+## Client Fields Reference
+
+| Field     | Type   | Required | Description                                      |
+|-----------|--------|----------|--------------------------------------------------|
+| `name`    | string | ✅ Yes   | Full name of the person or business              |
+| `email`   | string | No       | Contact email address for the client             |
+| `phone`   | string | No       | Phone number (any format)                        |
+| `address` | string | No       | Mailing or billing address                       |

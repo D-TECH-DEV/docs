@@ -1,0 +1,142 @@
+---
+title: "PUT /api/invoices/{id} — Update an Invoice"
+sidebarTitle: "Update Invoice"
+description: "PUT /api/invoices/{id} — Modify an existing invoice's client, status, total, or line items. Returns the fully updated invoice."
+---
+
+Update any field on an existing invoice — change its payment status, reassign it to a different client, adjust the total, or replace its line items entirely. Send only the fields you want to modify alongside those you want to keep unchanged.
+
+## Endpoint
+
+```
+PUT /api/invoices/{id}
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+## Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The numeric ID of the invoice to update.
+</ParamField>
+
+## Request Body
+
+<ParamField body="client" type="object">
+  Reassign the invoice to a different client.
+
+  <Expandable title="client fields">
+    <ParamField body="id" type="integer" required>
+      The numeric ID of the target client.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="status" type="integer">
+  Updated payment status. Pass one of the following integer codes:
+
+  | Value | Meaning |
+  |-------|---------|
+  | `200` | `paid` |
+  | `400` | `unpaid` |
+  | `500` | `pending` |
+</ParamField>
+
+<ParamField body="total" type="number">
+  Updated total amount. If you also send a new `items` array, the server will derive the total from the items unless you override it here.
+</ParamField>
+
+<ParamField body="items" type="array">
+  Replacement set of line items. Sending this field **replaces** all existing items on the invoice.
+
+  <Expandable title="items[] fields">
+    <ParamField body="description" type="string">
+      Description of the product or service.
+    </ParamField>
+
+    <ParamField body="quantity" type="integer">
+      Number of units.
+    </ParamField>
+
+    <ParamField body="price" type="number">
+      Unit price for this item.
+    </ParamField>
+
+    <ParamField body="total" type="number">
+      Line total (`quantity × price`).
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Example Request
+
+The following example marks invoice `42` as paid by changing the status from `400` (unpaid) to `200` (paid).
+
+<CodeGroup>
+```bash cURL
+curl -X PUT "http://localhost:8080/api/invoices/42" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client": { "id": 1 },
+    "status": 200,
+    "items": [
+      {
+        "description": "Web design",
+        "quantity": 1,
+        "price": 1000.00,
+        "total": 1000.00
+      },
+      {
+        "description": "Hosting (1 year)",
+        "quantity": 1,
+        "price": 500.00,
+        "total": 500.00
+      }
+    ]
+  }'
+```
+</CodeGroup>
+
+## Response
+
+Returns the fully updated `InvoiceResponse` object.
+
+```json
+{
+  "id": 42,
+  "number": "INV-2024-042",
+  "client": {
+    "id": 1,
+    "name": "Acme Corp",
+    "email": "billing@acme.com",
+    "phone": "+1-555-0100",
+    "address": "123 Main St"
+  },
+  "total": 1500.00,
+  "status": "paid",
+  "token": "abc123xyz456",
+  "createdAt": "2024-01-15T10:30:00",
+  "updatedAt": "2024-01-15T11:00:00",
+  "items": [
+    {
+      "id": 1,
+      "description": "Web design",
+      "quantity": 1,
+      "price": 1000.00,
+      "total": 1000.00
+    },
+    {
+      "id": 2,
+      "description": "Hosting (1 year)",
+      "quantity": 1,
+      "price": 500.00,
+      "total": 500.00
+    }
+  ]
+}
+```
+
+<Note>
+  Sending a new `items` array **replaces all existing line items** on the invoice. To keep current items, include them in the array alongside any additions or changes.
+</Note>

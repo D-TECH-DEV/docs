@@ -1,0 +1,145 @@
+---
+title: "Invoices: Structure, Status, and Line Items"
+sidebarTitle: "Invoices"
+description: "Understand how Invoksa invoices work: the invoice object, line items, status codes, auto-generated numbers, and shareable tokens."
+---
+
+Invoices are the core resource in Invoksa. Each invoice belongs to exactly one of your clients and contains one or more line items that describe the goods or services you are billing for. When you create an invoice, Invoksa automatically generates a reference number and a unique shareable token so you can send a public link to your client without exposing authenticated endpoints.
+
+---
+
+## The Invoice Object
+
+Every invoice returned by the API has the following shape:
+
+<ResponseField name="id" type="number" required>
+  The unique numeric identifier for this invoice. Use this value when fetching, updating, or deleting a specific invoice.
+</ResponseField>
+
+<ResponseField name="number" type="string" required>
+  The auto-generated human-readable reference number for this invoice (for example, `INV-00042`). The system assigns this value on creation — you do not set it manually.
+</ResponseField>
+
+<ResponseField name="client" type="object" required>
+  The client this invoice belongs to, returned as a nested `ClientResponse` object.
+
+  <Expandable title="client fields">
+    <ResponseField name="id" type="number">The client's unique identifier.</ResponseField>
+    <ResponseField name="name" type="string">The client's full name or business name.</ResponseField>
+    <ResponseField name="email" type="string">The client's email address.</ResponseField>
+    <ResponseField name="phone" type="string">The client's phone number.</ResponseField>
+    <ResponseField name="address" type="string">The client's billing address.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="total" type="number" required>
+  The total monetary amount for this invoice, calculated as the sum of all line item totals.
+</ResponseField>
+
+<ResponseField name="status" type="string" required>
+  The current payment status of the invoice. One of `paid`, `unpaid`, or `pending`. See [Invoice Status](#invoice-status) for the integer-to-string mapping used in requests.
+</ResponseField>
+
+<ResponseField name="token" type="string" required>
+  A unique, unguessable token for the public shareable link. Pass this value to `/api/i/{token}` to share a read-only view of the invoice without requiring the recipient to authenticate.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string" required>
+  ISO 8601 datetime string representing when the invoice was created (for example, `2024-06-15T10:32:00`).
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string" required>
+  ISO 8601 datetime string representing when the invoice was last modified.
+</ResponseField>
+
+<ResponseField name="items" type="array" required>
+  An ordered list of line items included in this invoice. See [Invoice Line Items](#invoice-line-items) for the shape of each element.
+</ResponseField>
+
+---
+
+## Invoice Line Items
+
+Each element in the `items` array represents a single line on the invoice.
+
+<ResponseField name="id" type="number" required>
+  The unique identifier for this line item.
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  A human-readable description of the product or service billed on this line (for example, `"Website redesign — homepage"`).
+</ResponseField>
+
+<ResponseField name="quantity" type="number" required>
+  The number of units billed on this line.
+</ResponseField>
+
+<ResponseField name="price" type="number" required>
+  The per-unit price for this line item.
+</ResponseField>
+
+<ResponseField name="total" type="number" required>
+  The computed total for this line item (`quantity × price`).
+</ResponseField>
+
+---
+
+## Invoice Status
+
+Invoksa tracks three payment statuses. When you **create or update** an invoice, send the status as an integer. The API always **returns** the status as a human-readable string.
+
+| Integer to send | String returned | Meaning |
+|---|---|---|
+| `200` | `"paid"` | The client has paid this invoice. |
+| `400` | `"unpaid"` | Payment has not been received. |
+| `500` | `"pending"` | The invoice has been sent and is awaiting payment. |
+
+<Note>
+  Always send the numeric status code (`200`, `400`, or `500`) in the request body when creating or updating an invoice. The response will always return the equivalent string (`paid`, `unpaid`, or `pending`).
+</Note>
+
+---
+
+## Invoice Numbers
+
+Invoice numbers are assigned automatically by Invoksa at creation time. You do not need to supply or track a numbering scheme yourself — the system guarantees that each invoice you create receives a unique, sequential reference number. This number appears on the generated PDF and in the public shareable view.
+
+---
+
+## Shareable Token
+
+Every invoice has a `token` field. Use this token to construct a public, read-only URL that you can send directly to your client:
+
+```
+GET /api/i/{token}
+```
+
+This endpoint renders a human-readable HTML view of the invoice and requires **no authentication**. The token is unique and unguessable, so only recipients you share the link with can view the invoice.
+
+<Tip>
+  Share this link with your client so they can view their invoice in a browser without needing an Invoksa account.
+</Tip>
+
+---
+
+## Filtering Your Invoices
+
+Invoksa provides two scoped endpoints so you can fetch only the invoices relevant to you:
+
+**Your invoices only**
+
+```bash
+GET /api/invoices/me
+Authorization: Bearer <token>
+```
+
+Returns a list of all invoices that belong to your authenticated account.
+
+**Invoices for a specific client**
+
+```bash
+GET /api/invoices/client/{id}
+Authorization: Bearer <token>
+```
+
+Replace `{id}` with the numeric ID of the client whose invoices you want to retrieve. This is useful for displaying an invoice history on a per-client basis.

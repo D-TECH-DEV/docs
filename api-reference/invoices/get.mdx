@@ -1,0 +1,128 @@
+---
+title: "GET /api/invoices/{id} — Fetch a Single Invoice"
+sidebarTitle: "Get Invoice"
+description: "GET /api/invoices/{id} — Retrieve a single invoice by its ID, including client details and all line items."
+---
+
+Fetch a specific invoice using its numeric ID. The response includes the complete client profile, every line item, the current payment status, and the public token you can share with your client.
+
+## Endpoint
+
+```
+GET /api/invoices/{id}
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+## Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The numeric ID of the invoice to retrieve.
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "http://localhost:8080/api/invoices/42" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</CodeGroup>
+
+## Response
+
+Returns the full `InvoiceResponse` object for the requested invoice.
+
+```json
+{
+  "id": 42,
+  "number": "INV-2024-042",
+  "client": {
+    "id": 1,
+    "name": "Acme Corp",
+    "email": "billing@acme.com",
+    "phone": "+1-555-0100",
+    "address": "123 Main St"
+  },
+  "total": 1500.00,
+  "status": "unpaid",
+  "token": "abc123xyz456",
+  "createdAt": "2024-01-15T10:30:00",
+  "updatedAt": "2024-01-15T10:30:00",
+  "items": [
+    {
+      "id": 1,
+      "description": "Web design",
+      "quantity": 1,
+      "price": 1000.00,
+      "total": 1000.00
+    },
+    {
+      "id": 2,
+      "description": "Hosting (1 year)",
+      "quantity": 1,
+      "price": 500.00,
+      "total": 500.00
+    }
+  ]
+}
+```
+
+<ResponseField name="id" type="integer">
+  Unique numeric identifier of the invoice.
+</ResponseField>
+
+<ResponseField name="number" type="string">
+  Auto-generated sequential invoice number (e.g. `INV-2024-042`).
+</ResponseField>
+
+<ResponseField name="client" type="object">
+  Full profile of the client associated with this invoice.
+
+  <Expandable title="client fields">
+    <ResponseField name="id" type="integer">Client ID.</ResponseField>
+    <ResponseField name="name" type="string">Client display name.</ResponseField>
+    <ResponseField name="email" type="string">Client email address.</ResponseField>
+    <ResponseField name="phone" type="string">Client phone number.</ResponseField>
+    <ResponseField name="address" type="string">Client mailing address.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="total" type="number">
+  Total invoice amount.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current payment status: `"paid"`, `"unpaid"`, or `"pending"`.
+</ResponseField>
+
+<ResponseField name="token" type="string">
+  Unique public token. Use this to construct the shareable invoice URL: `/api/i/{token}`.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of when the invoice was created.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of the most recent update.
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  All line items attached to this invoice.
+
+  <Expandable title="items[] fields">
+    <ResponseField name="id" type="integer">Line item ID.</ResponseField>
+    <ResponseField name="description" type="string">Description of the product or service.</ResponseField>
+    <ResponseField name="quantity" type="integer">Number of units.</ResponseField>
+    <ResponseField name="price" type="number">Unit price.</ResponseField>
+    <ResponseField name="total" type="number">Line total (`quantity × price`).</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Error Responses
+
+| Status | Meaning |
+|--------|---------|
+| `401 Unauthorized` | Missing or invalid Bearer token. |
+| `404 Not Found` | No invoice with the given ID exists on your account. |

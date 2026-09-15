@@ -1,0 +1,101 @@
+---
+title: "POST /api/auth/login — Authenticate and Get Token"
+sidebarTitle: "Login"
+description: "POST /api/auth/login — Authenticate with your email and password to receive a JWT Bearer token for API access."
+---
+
+Log in with your email and password to receive a JWT Bearer token. Pass this token in the `Authorization: Bearer <token>` header on every subsequent authenticated request. Tokens are valid for 24 hours — after expiry you must log in again to obtain a new one.
+
+## Endpoint
+
+```
+POST /api/auth/login
+```
+
+**Authentication:** None required
+
+---
+
+## Request Body
+
+<ParamField body="email" type="string" required>
+  The email address associated with your registered Invoksa account.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Your account password.
+</ParamField>
+
+---
+
+## Request Example
+
+```bash
+curl -X POST https://your-domain.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane@example.com",
+    "password": "securepass"
+  }'
+```
+
+---
+
+## Response
+
+A successful request returns a JWT token alongside your account details.
+
+<ResponseField name="token" type="string">
+  Your JWT Bearer token. Use this value in the `Authorization` header for all authenticated API calls.
+</ResponseField>
+
+<ResponseField name="id" type="integer">
+  The unique numeric identifier for your account.
+</ResponseField>
+
+<ResponseField name="username" type="string">
+  Your account display name.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The email address associated with your account.
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  The role assigned to your account (e.g. `ROLE_USER`).
+</ResponseField>
+
+### Response Example
+
+```json
+{
+  "token": "Bearer eyJhbGciOiJIUzI1NiJ9...",
+  "id": 1,
+  "username": "jane_doe",
+  "email": "jane@example.com",
+  "role": "ROLE_USER"
+}
+```
+
+<Tip>
+  The `token` field may include a `Bearer ` prefix. Strip it before constructing your header, then send requests as:
+
+  ```
+  Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+  ```
+</Tip>
+
+---
+
+## Token Expiry
+
+Tokens are valid for **24 hours** from the moment of issue. Once a token expires, all authenticated requests will return `401 Unauthorized`. Log in again to receive a fresh token.
+
+---
+
+## Errors
+
+| Status | Meaning |
+|--------|---------|
+| `401 Unauthorized` | The email or password is incorrect. |
+| `403 Forbidden` | Your email address has not been verified yet. Check your inbox and complete the verification step before logging in. |

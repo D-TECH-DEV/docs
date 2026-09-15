@@ -1,0 +1,51 @@
+---
+title: "GET /api/auth/verify — Verify Your Email Address"
+sidebarTitle: "Verify Email"
+description: "GET /api/auth/verify?token={token} — Confirm your email address after registration using the token sent to your inbox."
+---
+
+After registering, Invoksa automatically sends a verification email to the address you provided. Use this endpoint to confirm your email address by supplying the token included in that email. Until verification is complete, login attempts will be rejected.
+
+## Endpoint
+
+```
+GET /api/auth/verify?token={token}
+```
+
+**Authentication:** None required
+
+---
+
+## Query Parameters
+
+<ParamField query="token" type="string" required>
+  The verification token delivered in the confirmation email. Copy it directly from the link in the email or paste the full URL into your browser.
+</ParamField>
+
+---
+
+## Request Example
+
+```bash
+curl "https://your-domain.com/api/auth/verify?token=eyJhbGciOiJIUzI1NiJ9..."
+```
+
+---
+
+## Response
+
+A successful request returns **HTTP 200** with a plain-text confirmation message indicating that your email has been verified.
+
+---
+
+## Errors
+
+| Status | Meaning |
+|--------|---------|
+| `400 Bad Request` | The token is expired or invalid. Request a new verification email by re-registering or contacting support. |
+
+---
+
+<Note>
+  Once your email is verified, you can log in normally using [POST /api/auth/login](/api-reference/auth/login). You only need to verify your address once.
+</Note>

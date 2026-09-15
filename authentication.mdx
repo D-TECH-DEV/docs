@@ -1,0 +1,109 @@
+---
+title: "Authenticate with the Invoksa API"
+sidebarTitle: "Authentication"
+description: "Invoksa uses JWT Bearer tokens for authentication. Learn how to obtain your token, pass it in requests, and handle auth errors."
+---
+
+Invoksa protects every resource endpoint with **JWT Bearer token authentication**. When you log in, the API returns a signed token that you include in the `Authorization` header of subsequent requests. Tokens are stateless — the API verifies the signature on each request without hitting a session store. Each token is valid for **24 hours**, after which you must log in again to get a fresh one.
+
+## Getting a Token
+
+Call `POST /api/auth/login` with your email and password to receive a token:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane@example.com",
+    "password": "securepassword123"
+  }'
+```
+
+A successful login returns your user profile together with the token:
+
+```json
+{
+  "id": 1,
+  "username": "jane",
+  "email": "jane@example.com",
+  "role": "USER",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqYW5lQGV4YW1wbGUuY29tIiwiaWF0IjoxNzA1MzEyMjAwLCJleHAiOjE3MDUzOTg2MDB9.abc123..."
+}
+```
+
+Copy the `token` value — you'll need it for every authenticated request.
+
+## Using Your Token
+
+Add the token to the `Authorization` header using the `Bearer` scheme:
+
+```
+Authorization: Bearer <your_token>
+```
+
+Here's how that looks on a real request — fetching your list of clients:
+
+<CodeGroup>
+
+```bash curl
+curl http://localhost:8080/api/clients \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+```javascript JavaScript (fetch)
+const response = await fetch("http://localhost:8080/api/clients", {
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+});
+
+const clients = await response.json();
+```
+
+```http HTTP
+GET /api/clients HTTP/1.1
+Host: localhost:8080
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+</CodeGroup>
+
+## Token Expiry
+
+<Note>
+  JWT tokens issued by Invoksa expire after **24 hours**. After expiry, every protected endpoint returns `401 Unauthorized`. Log in again via `POST /api/auth/login` to receive a new token and resume making requests.
+</Note>
+
+There is no token refresh endpoint — the login call is always the way to obtain a new token. If you're building a long-running integration, add logic to detect `401` responses and re-authenticate automatically.
+
+## Google OAuth2
+
+Invoksa supports login via Google OAuth2 as an alternative to email and password. Redirect your user to the configured Google OAuth2 authorization URL. After they grant access, Google redirects back to your configured redirect URI with a `token` query parameter containing a fully valid Invoksa JWT token:
+
+```
+https://your-domain.com/oauth2/callback?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+Use this token exactly as you would a token obtained from `POST /api/auth/login` — pass it as a `Bearer` token in the `Authorization` header. The same 24-hour expiry applies.
+
+## Email Verification
+
+All new accounts registered via `POST /api/auth/register` must verify their email address before logging in. Invoksa sends a verification link to the email you provided at registration.
+
+<Warning>
+  If you attempt to log in before verifying your email, the API will reject the request. Check your inbox (and spam folder) for the verification email, or call `GET /api/auth/verify?token=YOUR_VERIFICATION_TOKEN` with the token from that email to verify programmatically.
+</Warning>
+
+## Error Responses
+
+| HTTP Status | Meaning | Common Cause |
+|---|---|---|
+| `401 Unauthorized` | Missing or invalid token | Token not included in header, token is malformed, or token has expired |
+| `403 Forbidden` | Insufficient permissions | Authenticated user does not have access to the requested resource |
+
+When you receive a `401`, check that:
+1. You included the `Authorization: Bearer <token>` header.
+2. The token hasn't expired (issued more than 24 hours ago).
+3. The token value wasn't truncated or corrupted when you copied it.

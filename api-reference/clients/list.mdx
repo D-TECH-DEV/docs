@@ -1,0 +1,85 @@
+---
+title: "GET /api/clients/me — List Your Clients"
+sidebarTitle: "List Clients"
+description: "GET /api/clients/me — Retrieve all clients associated with your account. Returns an array of client objects."
+---
+
+Use this endpoint to fetch every client you have created on your Invoksa account. The response is an array of client objects, each containing the `id` and contact details you provided at creation time. This is the right starting point when building a client picker, a dashboard list, or any feature that needs to enumerate your clients.
+
+## Endpoint
+
+```
+GET /api/clients/me
+```
+
+## Authentication
+
+All requests to this endpoint require a valid JWT Bearer token in the `Authorization` header.
+
+```
+Authorization: Bearer <token>
+```
+
+## Request Parameters
+
+This endpoint accepts no query parameters or request body.
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET http://localhost:8080/api/clients/me \
+  -H "Authorization: Bearer <token>"
+```
+
+</CodeGroup>
+
+## Response
+
+Returns an array of client objects belonging to your account. The array is empty (`[]`) if you have not yet created any clients.
+
+<ResponseField name="id" type="number">
+  The unique identifier assigned to the client.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The display name of the client.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The client's email address.
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  The client's phone number.
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  The client's mailing or billing address.
+</ResponseField>
+
+```json Example Response — 200 OK
+[
+  {
+    "id": 1,
+    "name": "Acme Corp",
+    "email": "billing@acme.com",
+    "phone": "+1-555-0100",
+    "address": "123 Main St, Springfield"
+  },
+  {
+    "id": 2,
+    "name": "Globex Industries",
+    "email": "accounts@globex.com",
+    "phone": "+1-555-0199",
+    "address": "742 Evergreen Terrace, Shelbyville"
+  }
+]
+```
+
+## Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `401 Unauthorized` | The `Authorization` header is missing or the token is invalid/expired. |

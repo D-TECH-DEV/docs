@@ -1,0 +1,79 @@
+---
+title: "GET /api/i/{token} — View a Public Invoice"
+sidebarTitle: "View Invoice"
+description: "GET /api/i/{token} — Render a public HTML view of an invoice using its unique token. No authentication required — share this link directly with clients."
+---
+
+Every Invoksa invoice carries a unique `token` field that enables a public, no-login-required HTML view of that invoice. Use this link to share a professional, fully rendered invoice directly with your clients — no account or API key needed on their end.
+
+## Endpoint
+
+```
+GET /api/i/{token}
+```
+
+## Authentication
+
+None required. This endpoint is publicly accessible to anyone who has the URL.
+
+---
+
+## Path Parameters
+
+<ParamField path="token" type="string" required>
+  The unique token associated with the invoice. Retrieve this value from the `token` field of any `InvoiceResponse` object.
+</ParamField>
+
+---
+
+## Finding the Token
+
+The `token` field is included in every invoice response returned by the API. After creating or fetching an invoice, look for the `token` property in the response body:
+
+```json
+{
+  "id": 42,
+  "number": "INV-2024-042",
+  "token": "abc123xyz456",
+  ...
+}
+```
+
+Copy the value of `token` — you will use it to construct the public URL for that invoice.
+
+---
+
+## Constructing the URL
+
+Replace `your-domain.com` with the hostname where your Invoksa instance is running, then append the token as the path segment:
+
+```bash
+https://your-domain.com/api/i/abc123xyz456
+```
+
+Open this URL in a browser or share it with your client. No query parameters or headers are required.
+
+---
+
+## Response
+
+A successful request returns an HTTP `200 OK` with a `Content-Type: text/html` header. The response body is a fully rendered HTML page displaying the complete invoice details — line items, totals, dates, and client information — exactly as your client will see it.
+
+---
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Email to Clients" icon="envelope">
+    Copy the public URL and paste it directly into your email. Your client can open it instantly in any browser — no sign-up required.
+  </Card>
+  <Card title="Browser Preview" icon="globe">
+    Open the URL in any browser to preview exactly how your client will see the invoice before you send it.
+  </Card>
+</CardGroup>
+
+---
+
+<Note>
+  The public invoice link does **not** require login, so treat it like a confidential document. Anyone who has the URL can view the full invoice — including amounts, client details, and line items. Avoid sharing it in public channels.
+</Note>

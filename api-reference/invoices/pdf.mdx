@@ -1,0 +1,76 @@
+---
+title: "GET /api/invoices/{id}/pdf — Download Invoice as PDF"
+sidebarTitle: "Download PDF"
+description: "GET /api/invoices/{id}/pdf — Download a branded PDF for any invoice. Customize accent color, company name, contact info, and legal text via query parameters."
+---
+
+Generate and download a PDF version of any invoice, optionally branded with your company's name, contact details, and accent color. All query parameters are optional — omit them to generate a plain, unbranded PDF using the invoice data alone.
+
+## Endpoint
+
+```
+GET /api/invoices/{id}/pdf
+```
+
+**Authorization:** `Bearer <token>` — required.
+
+## Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The numeric ID of the invoice to export as PDF.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="color" type="string">
+  Hex accent color applied to the PDF layout (e.g. `#00bcff`). Controls headings, borders, and other branded elements.
+</ParamField>
+
+<ParamField query="name" type="string">
+  Company or individual name to display in the PDF header.
+</ParamField>
+
+<ParamField query="tel" type="string">
+  Phone number to display in the PDF contact section.
+</ParamField>
+
+<ParamField query="email" type="string">
+  Contact email address to display in the PDF.
+</ParamField>
+
+<ParamField query="address" type="string">
+  Business address to display in the PDF.
+</ParamField>
+
+<ParamField query="legalMentions" type="string">
+  Legal or regulatory text to appear in the PDF footer (e.g. VAT numbers, payment terms, disclaimers).
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -G "http://localhost:8080/api/invoices/42/pdf" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  --data-urlencode "color=#00bcff" \
+  --data-urlencode "name=Acme Corp" \
+  --data-urlencode "tel=+1-555-0100" \
+  --data-urlencode "email=billing@acme.com" \
+  --data-urlencode "address=123 Main St, Springfield" \
+  --data-urlencode "legalMentions=VAT No. FR12345678900 — Payment due within 30 days." \
+  --output facture_42.pdf
+```
+</CodeGroup>
+
+## Response
+
+On success, the server streams the PDF file directly.
+
+| Header | Value |
+|--------|-------|
+| `Content-Type` | `application/pdf` |
+| `Content-Disposition` | `attachment; filename=facture_{id}.pdf` |
+
+<Tip>
+  Use `--data-urlencode` (as shown above) or percent-encode any spaces, `#` characters, and special symbols in query parameter values. For example, `#00bcff` becomes `%2300bcff` when manually constructing the URL.
+</Tip>

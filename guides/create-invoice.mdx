@@ -1,0 +1,180 @@
+---
+title: "Create and Manage Invoices in Invoksa"
+sidebarTitle: "Create Invoices"
+description: "Step-by-step guide to creating invoices with line items, updating status, and managing your invoice list in Invoksa."
+---
+
+Invoices in Invoksa are rich documents that include line items with descriptions, quantities, and prices. The API automatically calculates invoice numbers and generates a unique public token for each invoice. This guide walks you through creating, reading, updating, and deleting invoices.
+
+## Before You Start
+
+<Note>
+  You need an existing client ID before you can create an invoice. If you haven't created a client yet, follow the [Manage Clients guide](/guides/manage-clients) first, then come back here.
+</Note>
+
+---
+
+## Create an Invoice
+
+<Steps>
+  <Step title="Prepare your invoice payload">
+    An invoice request requires a linked client, a status code, and at least one line item. Here's a breakdown of the request fields:
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `client.id` | integer | ✅ Yes | ID of an existing client |
+    | `status` | integer | ✅ Yes | `200` = paid, `400` = unpaid, `500` = pending |
+    | `total` | number | ✅ Yes | Total invoice amount |
+    | `items` | array | ✅ Yes | One or more line items (see below) |
+    | `items[].description` | string | ✅ Yes | Description of the service or product |
+    | `items[].quantity` | integer | ✅ Yes | Number of units |
+    | `items[].price` | number | ✅ Yes | Unit price |
+    | `items[].total` | number | ✅ Yes | Line item total (`quantity × price`) |
+  </Step>
+  <Step title="POST to /api/invoices">
+    Send the invoice payload in a `POST` request. The example below bills a client for web design and hosting services.
+
+    ```bash
+    curl -X POST http://localhost:8080/api/invoices \
+      -H "Authorization: Bearer YOUR_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "client": { "id": 7 },
+        "status": 400,
+        "total": 1350.00,
+        "items": [
+          {
+            "description": "Website design and development",
+            "quantity": 1,
+            "price": 1200.00,
+            "total": 1200.00
+          },
+          {
+            "description": "Annual hosting setup",
+            "quantity": 1,
+            "price": 150.00,
+            "total": 150.00
+          }
+        ]
+      }'
+    ```
+  </Step>
+  <Step title="Review the response">
+    A successful request returns `201 Created` with the full invoice object. Notice the auto-generated `number`, the human-readable `status` string, and the unique `token` for public sharing.
+
+    ```json
+    {
+      "id": 42,
+      "number": "INV-0042",
+      "status": "unpaid",
+      "total": 1350.00,
+      "token": "abc123xyz789",
+      "client": {
+        "id": 7,
+        "name": "Acme Corporation",
+        "email": "finance@acme.com"
+      },
+      "items": [
+        {
+          "id": 101,
+          "description": "Website design and development",
+          "quantity": 1,
+          "price": 1200.00,
+          "total": 1200.00
+        },
+        {
+          "id": 102,
+          "description": "Annual hosting setup",
+          "quantity": 1,
+          "price": 150.00,
+          "total": 150.00
+        }
+      ]
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Invoice Status
+
+When creating or updating an invoice, pass `status` as an **integer**. The API returns the status as a human-readable **string** in responses.
+
+| Integer value | String value | Meaning                              |
+|---------------|--------------|--------------------------------------|
+| `200`         | `"paid"`     | Payment has been received            |
+| `400`         | `"unpaid"`   | Invoice has been sent but not paid   |
+| `500`         | `"pending"`  | Invoice is a draft or not yet sent   |
+
+---
+
+## Update an Invoice
+
+Send a `PUT` request to `/api/invoices/{id}` to modify an existing invoice. The example below marks invoice 42 as paid.
+
+```bash
+curl -X PUT http://localhost:8080/api/invoices/42 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client": { "id": 7 },
+    "status": 200,
+    "total": 1350.00,
+    "items": [
+      {
+        "description": "Website design and development",
+        "quantity": 1,
+        "price": 1200.00,
+        "total": 1200.00
+      },
+      {
+        "description": "Annual hosting setup",
+        "quantity": 1,
+        "price": 150.00,
+        "total": 150.00
+      }
+    ]
+  }'
+```
+
+The response mirrors the full updated invoice object with `"status": "paid"`.
+
+---
+
+## Get a Specific Invoice
+
+Fetch a single invoice by its ID.
+
+```bash
+curl -X GET http://localhost:8080/api/invoices/42 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+Returns the full invoice object as shown in the [Create response](#create-an-invoice) above.
+
+---
+
+## List Your Invoices
+
+Retrieve all invoices belonging to your account.
+
+```bash
+curl -X GET http://localhost:8080/api/invoices/me \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+Returns an array of invoice objects. Use the `status` field to filter or sort in your own application.
+
+---
+
+## Delete an Invoice
+
+Send a `DELETE` request to permanently remove an invoice.
+
+```bash
+curl -X DELETE http://localhost:8080/api/invoices/42 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+A successful deletion returns `204 No Content` with an empty body. This action is irreversible.

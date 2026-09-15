@@ -1,0 +1,89 @@
+---
+title: "Share Invoices with a Public Link"
+sidebarTitle: "Public Invoice Link"
+description: "Every Invoksa invoice has a unique public link that lets clients view their invoice in a browser without logging in."
+---
+
+Each invoice in Invoksa carries a unique `token` field that enables a public, no-authentication-required view of that invoice. This is the easiest way to share an invoice with a client — simply send them the URL and they can open it directly in any browser, no Invoksa account needed.
+
+## Finding Your Invoice Token
+
+Every time you create or retrieve an invoice, the response includes a `token` field. This token is generated automatically and is unique to that invoice.
+
+Here's a sample `InvoiceResponse` — notice the `token` field:
+
+```json {11}
+{
+  "id": 42,
+  "number": "INV-0042",
+  "status": "unpaid",
+  "total": 1350.00,
+  "token": "abc123xyz789",
+  "client": {
+    "id": 7,
+    "name": "Acme Corporation",
+    "email": "finance@acme.com"
+  },
+  "items": [
+    {
+      "description": "Website design and development",
+      "quantity": 1,
+      "price": 1200.00,
+      "total": 1200.00
+    }
+  ]
+}
+```
+
+Copy the value of `token` — you'll use it to build the public URL.
+
+---
+
+## The Public Invoice URL
+
+```
+GET /api/i/{token}
+```
+
+No `Authorization` header is required. When a client opens this URL in a browser, Invoksa renders an HTML page displaying the full invoice. Replace `{token}` with the token value from your invoice.
+
+---
+
+## Example
+
+To construct the public link for the invoice above, append the token to your base URL:
+
+```
+https://your-domain.com/api/i/abc123xyz789
+```
+
+You can test this in your browser or with curl:
+
+```bash
+curl https://your-domain.com/api/i/abc123xyz789
+```
+
+This returns a rendered HTML page — no authentication headers needed.
+
+---
+
+## Sharing with Clients
+
+<CardGroup cols={2}>
+  <Card title="Copy from the API response" icon="copy">
+    Every create or fetch response contains the `token` field. Grab it directly from the JSON and append it to your base URL.
+  </Card>
+  <Card title="Send via email" icon="envelope">
+    Paste the full public URL into your email client. Your client clicks the link and instantly views their invoice in a browser.
+  </Card>
+  <Card title="Embed in a message" icon="message">
+    Include the URL in a Slack message, SMS, or any messaging platform — the link works anywhere.
+  </Card>
+  <Card title="No account required" icon="user-slash">
+    Your client does not need an Invoksa account to view the invoice. The public link is self-contained.
+  </Card>
+</CardGroup>
+
+<Note>
+  The token is unique and cryptographically unguessable, but the invoice page it points to is **publicly accessible to anyone who has the URL**. Treat the link as confidential — share it only with the intended recipient and avoid posting it in public channels.
+</Note>

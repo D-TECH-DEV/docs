@@ -1,0 +1,57 @@
+---
+title: "DELETE /api/clients/{id} — Remove a Client"
+sidebarTitle: "Delete Client"
+description: "DELETE /api/clients/{id} — Permanently delete a client from your account. Returns 204 No Content on success."
+---
+
+Permanently delete a client from your Invoksa account. Once deleted, the client record is gone and this action cannot be undone. Before proceeding, review any invoices associated with this client to avoid orphaning billing history you may still need.
+
+## Endpoint
+
+```
+DELETE /api/clients/{id}
+```
+
+## Authentication
+
+All requests to this endpoint require a valid JWT Bearer token in the `Authorization` header.
+
+```
+Authorization: Bearer <token>
+```
+
+## Path Parameters
+
+<ParamField path="id" type="number" required>
+  The unique ID of the client you want to delete. Retrieve this from the [List Clients](/api-reference/clients/list) endpoint.
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X DELETE http://localhost:8080/api/clients/1 \
+  -H "Authorization: Bearer <token>"
+```
+
+</CodeGroup>
+
+## Response
+
+On success, Invoksa returns an empty `204 No Content` response with no body.
+
+```
+HTTP/1.1 204 No Content
+```
+
+<Warning>
+  Deleting a client is **permanent and irreversible**. Associated invoice records may be affected after the client is removed. Review all invoices linked to this client before confirming deletion to avoid losing important billing history.
+</Warning>
+
+## Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `401 Unauthorized` | The `Authorization` header is missing or the token is invalid/expired. |
+| `404 Not Found` | No client with the given `id` exists on your account. |

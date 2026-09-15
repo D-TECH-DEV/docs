@@ -1,47 +1,177 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get started with Invoksa in 5 minutes"
+sidebarTitle: "Quickstart"
+description: "Learn how to register, authenticate, create your first client, and generate your first invoice with Invoksa in five steps."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+By the end of this guide you'll have a verified Invoksa account, a JWT token, a client record, and a live invoice — all created through the API. Each step builds on the previous one, so follow them in order. You'll need `curl` or any HTTP client installed on your machine.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Register Your Account">
+    Send a `POST` request to `/api/auth/register` with your username, email, and password to create a new account.
 
     ```bash
-    npm install your-package
+    curl -X POST http://localhost:8080/api/auth/register \
+      -H "Content-Type: application/json" \
+      -d '{
+        "username": "jane",
+        "email": "jane@example.com",
+        "password": "securepassword123"
+      }'
     ```
+
+    A successful registration returns your new user profile:
+
+    ```json
+    {
+      "id": 1,
+      "username": "jane",
+      "email": "jane@example.com",
+      "role": "USER",
+      "emailVerified": false,
+      "createdAt": "2024-01-15T10:30:00"
+    }
+    ```
+
+    Notice that `emailVerified` is `false` — you must verify your email before you can log in.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+
+  <Step title="Verify Your Email">
+    Check your inbox for a verification email from Invoksa. Click the link inside, or call the verification endpoint directly with the token from the email:
 
     ```bash
-    your-cli init
+    curl "http://localhost:8080/api/auth/verify?token=YOUR_VERIFICATION_TOKEN"
     ```
+
+    Once verified, your account is active and ready to use.
+
+    <Note>
+      If you don't see the verification email, check your spam folder. The verification token is single-use and may expire — re-register if needed.
+    </Note>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+
+  <Step title="Log In">
+    Exchange your credentials for a JWT Bearer token by posting to `/api/auth/login`:
 
     ```bash
-    your-cli start
+    curl -X POST http://localhost:8080/api/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "jane@example.com",
+        "password": "securepassword123"
+      }'
     ```
+
+    The response includes your token alongside your profile details:
+
+    ```json
+    {
+      "id": 1,
+      "username": "jane",
+      "email": "jane@example.com",
+      "role": "USER",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+    ```
+
+    <Tip>
+      Copy the `token` value and store it in an environment variable so you can reuse it across requests: `export TOKEN="eyJhbGci..."`.
+    </Tip>
+  </Step>
+
+  <Step title="Create a Client">
+    Add your first client by posting to `/api/clients` with the Bearer token you received in the previous step:
+
+    ```bash
+    curl -X POST http://localhost:8080/api/clients \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $TOKEN" \
+      -d '{
+        "name": "Acme Corp",
+        "email": "billing@acme.com",
+        "phone": "+1 555 000 1234",
+        "address": "123 Main St, Springfield, USA"
+      }'
+    ```
+
+    Invoksa returns the newly created client record:
+
+    ```json
+    {
+      "id": 1,
+      "name": "Acme Corp",
+      "email": "billing@acme.com",
+      "phone": "+1 555 000 1234",
+      "address": "123 Main St, Springfield, USA"
+    }
+    ```
+
+    Note the `id` — you'll need it in the next step to link this client to an invoice.
+  </Step>
+
+  <Step title="Create an Invoice">
+    Create your first invoice by posting to `/api/invoices`. Use the `clientId` from the previous step and include at least one line item in the `items` array. Set `status` to `400` for unpaid:
+
+    ```bash
+    curl -X POST http://localhost:8080/api/invoices \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $TOKEN" \
+      -d '{
+        "clientId": 1,
+        "status": 400,
+        "items": [
+          {
+            "description": "Website design",
+            "quantity": 1,
+            "unitPrice": 1200.00
+          },
+          {
+            "description": "Hosting setup",
+            "quantity": 2,
+            "unitPrice": 75.00
+          }
+        ]
+      }'
+    ```
+
+    Invoksa creates the invoice and returns its full record, including the auto-generated invoice number, public share token, and human-readable status:
+
+    ```json
+    {
+      "id": 1,
+      "invoiceNumber": "INV-0001",
+      "token": "a3f8c2e1-9b4d-4f7a-8c3e-1d2f5a6b7c8d",
+      "status": "unpaid",
+      "clientId": 1,
+      "items": [
+        {
+          "id": 1,
+          "description": "Website design",
+          "quantity": 1,
+          "unitPrice": 1200.00
+        },
+        {
+          "id": 2,
+          "description": "Hosting setup",
+          "quantity": 2,
+          "unitPrice": 75.00
+        }
+      ],
+      "createdAt": "2024-01-15T11:00:00"
+    }
+    ```
+
+    Your invoice is live. Use the `token` to share a public view with your client at `GET /api/i/{token}`, or export a PDF at `GET /api/invoices/{id}/pdf`.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## What's Next?
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+<CardGroup cols={2}>
+  <Card title="Manage Clients" icon="users" href="/guides/manage-clients">
+    Learn how to list, update, and delete client records and keep your client data organized.
+  </Card>
+  <Card title="Manage Invoices" icon="file-invoice" href="/guides/create-invoice">
+    Explore invoice updates, status transitions, PDF export options, and public sharing.
+  </Card>
+</CardGroup>

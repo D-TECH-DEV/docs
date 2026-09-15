@@ -1,0 +1,73 @@
+---
+title: "Invoksa: Invoice & Client Management API"
+sidebarTitle: "Introduction"
+description: "Invoksa is a REST API that lets you create and manage clients, generate invoices with line items, export PDFs, and create invoices from natural language using AI."
+---
+
+Invoksa is a self-hosted REST API built for developers and businesses that need a clean, programmable invoicing backend. It lets you store client records, create invoices with multiple line items, track payment statuses, export PDFs with custom branding, share invoices publicly via unique links, and generate entire invoices from a plain-language description using Google Gemini. If you're building a billing tool, a freelance management app, or adding invoicing to an existing product, Invoksa is designed to fit your stack without friction.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Client Management" icon="users">
+    Create and manage client profiles with name, email, phone, and address. Clients are linked directly to invoices.
+  </Card>
+  <Card title="Invoice Management" icon="file-invoice">
+    Build invoices with itemized line items. Track status as paid, unpaid, or pending, and update records at any time.
+  </Card>
+  <Card title="PDF Generation" icon="file-pdf">
+    Export any invoice to a polished PDF. Pass query parameters to customize the accent color, contact info, and legal mentions.
+  </Card>
+  <Card title="AI Invoice Creation" icon="wand-magic-sparkles">
+    Send a natural-language description to the AI endpoint and receive a fully structured invoice ready to save or edit.
+  </Card>
+  <Card title="Shareable Invoice Links" icon="link">
+    Every invoice gets a unique public token. Share a read-only HTML view with clients — no authentication required on their end.
+  </Card>
+  <Card title="Secure Authentication" icon="lock">
+    JWT Bearer tokens with a 24-hour expiry protect every endpoint. Google OAuth2 login is also supported out of the box.
+  </Card>
+</CardGroup>
+
+## How It Works
+
+The typical Invoksa workflow goes like this: register an account and verify your email, then authenticate to receive a JWT token. Use that token to create client records and attach them to invoices. Once an invoice exists, export it as a PDF, share it with your client via its public link, or update its status when payment arrives. At any point you can use the AI endpoint to generate an invoice from a plain-text description instead of building it manually.
+
+## Base URL
+
+All API requests are made to your own hosted instance of Invoksa:
+
+```
+https://your-domain.com
+```
+
+<Note>
+  Replace `https://your-domain.com` with the actual domain or IP address where you have deployed your Invoksa instance. Local development typically uses `http://localhost:8080`.
+</Note>
+
+## Authentication
+
+Invoksa uses **JWT Bearer tokens** to authenticate requests. Obtain a token by posting your credentials to `POST /api/auth/login`, then include it in the `Authorization` header of every protected request:
+
+```
+Authorization: Bearer <your_token>
+```
+
+Tokens expire after **24 hours**. See the [Authentication](/authentication) page for the full login flow, Google OAuth2 setup, and error handling.
+
+## Response Format
+
+Every endpoint returns JSON. A typical success response looks like this:
+
+```json
+{
+  "id": 1,
+  "username": "jane",
+  "email": "jane@example.com",
+  "role": "USER",
+  "emailVerified": true,
+  "createdAt": "2024-01-15T10:30:00"
+}
+```
+
+Error responses include an HTTP status code and a message describing what went wrong.

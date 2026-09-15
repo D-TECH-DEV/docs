@@ -1,24 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
+  "projectType": "api-service",
+  "projectName": "Invoksa",
+  "projectDescription": "Invoksa is a REST API for invoice and client management, featuring JWT and OAuth2 authentication, PDF invoice generation, and AI-powered invoice creation.",
   "theme": "luma",
-  "name": "Invoksa",
-  "colors": {
-    "primary": "#00bcff",
-    "light": "#7141b1",
-    "dark": "#a0dafa"
-  },
-  "favicon": "https://media.brand.dev/290d15fc-a384-4ca0-ab97-a7e6257b26ae.svg",
-  "logo": {
-    "light": "https://media.brand.dev/21098a62-bcca-42bb-ac5f-c7af2d59e5b8.png",
-    "dark": "https://media.brand.dev/21098a62-bcca-42bb-ac5f-c7af2d59e5b8.png"
-  },
-  "navbar": {
-    "primary": {
-      "type": "button",
-      "label": "Get Started",
-      "href": "/quickstart"
-    }
-  },
+  "primaryColor": "#00bcff",
+  "lightColor": "#7141b1",
+  "darkColor": "#a0dafa",
   "navigation": {
     "tabs": [
       {
@@ -95,7 +82,35 @@
       }
     ]
   },
-  "footer": {
-    "socials": {}
-  }
+  "keyFeatures": [
+    "JWT-based authentication with email verification",
+    "Google OAuth2 login support",
+    "Client management (create, update, delete, list)",
+    "Invoice management with line items and status tracking",
+    "PDF invoice generation with custom branding options",
+    "AI-powered invoice generation from natural language descriptions (Google Gemini)",
+    "Public shareable invoice links via unique tokens",
+    "Password reset via email OTP flow"
+  ],
+  "publicApiSurface": [
+    "POST /api/auth/register",
+    "POST /api/auth/login",
+    "GET /api/auth/verify?token={token}",
+    "POST /api/auth/confirm-pwd/{email}",
+    "POST /api/auth/reset-pwd",
+    "POST /api/clients",
+    "GET /api/clients/me",
+    "PUT /api/clients/{id}",
+    "DELETE /api/clients/{id}",
+    "GET /api/invoices",
+    "GET /api/invoices/{id}",
+    "GET /api/invoices/me",
+    "POST /api/invoices",
+    "PUT /api/invoices/{id}",
+    "DELETE /api/invoices/{id}",
+    "GET /api/invoices/{id}/pdf",
+    "GET /api/invoices/ai?description={text}&lang={lang}&devise={currency}",
+    "GET /api/ia/invoice?description={text}&lang={lang}",
+    "GET /api/i/{token}"
+  ]
 }
