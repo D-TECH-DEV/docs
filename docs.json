@@ -105,5 +105,8 @@
       "light": "#ED3030",
       "dark": "#DB1717"
     }
+  },
+  "styling": {
+    "codeblocks": "dark"
   }
 }
