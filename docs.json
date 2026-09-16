@@ -97,5 +97,9 @@
   },
   "footer": {
     "socials": {}
+  },
+  "banner": {
+    "content": "ndndndndn",
+    "dismissible": true
   }
 }
