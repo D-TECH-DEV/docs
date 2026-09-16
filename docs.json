@@ -100,6 +100,10 @@
   },
   "banner": {
     "content": "ndndndndn",
-    "dismissible": true
+    "dismissible": true,
+    "color": {
+      "light": "#ED3030",
+      "dark": "#DB1717"
+    }
   }
 }
