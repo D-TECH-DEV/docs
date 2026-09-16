@@ -9,7 +9,7 @@
   },
   "favicon": "https://media.brand.dev/290d15fc-a384-4ca0-ab97-a7e6257b26ae.svg",
   "logo": {
-    "light": "https://media.brand.dev/21098a62-bcca-42bb-ac5f-c7af2d59e5b8.png",
+    "light": "/images/utra_dev_logo.png",
     "dark": "https://media.brand.dev/21098a62-bcca-42bb-ac5f-c7af2d59e5b8.png"
   },
   "navbar": {
