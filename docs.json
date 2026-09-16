@@ -108,5 +108,8 @@
   },
   "styling": {
     "codeblocks": "dark"
+  },
+  "interaction": {
+    "drilldown": true
   }
 }
